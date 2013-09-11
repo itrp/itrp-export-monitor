@@ -1,4 +1,5 @@
-%w(version).each{ |f| require "itrp/client/#{f}" }
+%w(itrp itrp/export).each{ |f| require f }
+%w(version mail).each{ |f| require "itrp/export/#{f}" }
 
 # cherry-pick some core extensions from active support
 require 'active_support/core_ext/module/aliasing.rb'
@@ -50,6 +51,8 @@ module Itrp
 
           # start clacks
 
+          # return the singleton instance
+          @singleton
         end
 
         def process(mail)
@@ -64,6 +67,11 @@ module Itrp
           raise ::Itrp::Exception.new("Missing required configuration option #{required_option}") if option(required_option).blank?
         end
         @logger = @options[:logger]
+      end
+
+      # Retrieve an option
+      def option(key)
+        @options[key]
       end
 
       def process(mail)
