@@ -20,9 +20,16 @@ Dir["#{dir}/support/**/*.rb"].each { |f| require f }
 RSpec.configure do |config|
   config.before(:each) do
     @spec_dir = File.dirname(__FILE__)
+
+    # create /spec/log directory
     log_dir = @spec_dir + '/log'
     Dir.mkdir(log_dir) unless File.exists?(log_dir)
+    # and log to /spec/log/test.log by default
     Itrp::Export.configuration.logger = Logger.new("#{log_dir}/test.log")
+
+    # delete csv and genereated rb files in the /spec/tmp directory
+    Dir.glob("#{@spec_dir}/tmp/**/*.{csv,rb}").each{ |f| File.delete(f) }
+
     @fixture_dir = "#{dir}/support/fixtures"
   end
   config.after(:each) { Itrp::Export.configuration.reset }
