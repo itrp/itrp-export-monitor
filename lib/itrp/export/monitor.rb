@@ -61,7 +61,7 @@ module Itrp
           args = ['-c', clacks_config_filename]
           args << '-D' if @singleton.option(:daemonize)
           Clacks::Command.new(args).exec
-          # return the singleton instance
+          # returns the singleton instance
           @singleton
         end
 
@@ -88,9 +88,9 @@ module Itrp
         mail = Itrp::Export::Mail.new(mail)
         if option(:ids).include?(mail.export_id)
           begin
-            @logger.info { "Processing ITRP Export mail:\nSubject #{mail.original.subject}\nExport ID: #{mail.export_id}\nToken: #{mail.token}\nURI: #{mail.download_uri}" }
+            @logger.info { "Processing ITRP Export mail:\n  Subject: #{mail.original.subject}\n  Export ID: #{mail.export_id}\n  Token: #{mail.token}\n  URI: #{mail.download_uri}" }
             store_export(mail)
-          rescue Exception => ex
+          rescue ::Exception => ex
             @logger.error { "Processing failed: #{ex.message}\n  #{ex.backtrace.join("\n  ")}" }
             mail.ignore # leave mail in the mailbox
           end
@@ -113,16 +113,16 @@ Clacks.config.stdout_path = "#{dir(:logs)}/#{monitor_id}.log"
 Clacks.config.stderr_path = "#{dir(:logs)}/#{monitor_id}.log"
 
 Clacks.config.imap({
-  address:    '#{config(:imap_address)}',
-  port:       #{config(:imap_port)},
-  user_name:  '#{config(:imap_user_name)}',
-  password:   '#{config(:imap_password)}',
-  enable_ssl: #{config(:imap_ssl)}
+  address:    '#{option(:imap_address)}',
+  port:       #{option(:imap_port)},
+  user_name:  '#{option(:imap_user_name)}',
+  password:   '#{option(:imap_password)}',
+  enable_ssl: #{option(:imap_ssl)}
 })
 
 Clacks.config.find_options({
-  mailbox:           '#{config(:imap_mailbox)}',
-  archivebox:        '#{config(:imap_archive)}',
+  mailbox:    '#{option(:imap_mailbox)}',
+  archivebox: '#{option(:imap_archive)}',
   delete_after_find: true # Note that only the processed export mails will be deleted
 })
 
@@ -155,7 +155,7 @@ EOF
         to_dir = option(:to)
         FileUtils.mkpath(to_dir)
         FileUtils.copy(local_filename, to_dir)
-        Itrp.log.info { "Copied export '#{local_filename}' to '#{to_dir}'" }
+        @logger.info { "Copied export '#{local_filename}' to '#{to_dir}'" }
       end
 
       def ftp_export(local_filename)
@@ -164,11 +164,11 @@ EOF
           ftp.putbinaryfile(local_filename, "#{remote_filename}.in_progress")
           ftp.rename("#{remote_filename}.in_progress", remote_filename)
         end
-        Itrp.log.info { "Moved export '#{local_filename}' to '#{option(:to_ftp)}/#{remote_filename}'" }
+        @logger.info { "FTP export '#{local_filename}' to '#{option(:to_ftp)}/#{remote_filename}'" }
       end
 
       def dir(subdir)
-        directory = File.expand_path(subdir, option(:root))
+        directory = File.expand_path(subdir.to_s, option(:root))
         FileUtils.mkpath(directory)
         directory
       end

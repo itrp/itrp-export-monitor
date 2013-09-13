@@ -19,7 +19,8 @@ Dir["#{dir}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
   config.before(:each) do
-    log_dir = File.dirname(__FILE__) + '/log'
+    @spec_dir = File.dirname(__FILE__)
+    log_dir = @spec_dir + '/log'
     Dir.mkdir(log_dir) unless File.exists?(log_dir)
     Itrp::Export.configuration.logger = Logger.new("#{log_dir}/test.log")
     @fixture_dir = "#{dir}/support/fixtures"
