@@ -1,0 +1,93 @@
+Delivered-To: example.mailbox@itrp.com
+Received: by 10.216.34.132 with SMTP id s4csp79527wea;
+        Mon, 9 Sep 2013 09:10:30 -0700 (PDT)
+X-Received: by 10.229.250.5 with SMTP id mm5mr25277368qcb.19.1378743029884;
+        Mon, 09 Sep 2013 09:10:29 -0700 (PDT)
+Return-Path: <bounced.mailbox@itrp.com>
+Received: from support.itrp.com (support.itrp.com. [184.72.241.64])
+        by mx.google.com with ESMTP id o3si801324qat.190.1969.12.31.16.00.00;
+        Mon, 09 Sep 2013 09:10:29 -0700 (PDT)
+Received-SPF: pass (google.com: domain of bounced.mailbox@itrp.com designates 184.72.241.64 as permitted sender) client-ip=184.72.241.64;
+Authentication-Results: mx.google.com;
+       spf=pass (google.com: domain of bounced.mailbox@itrp.com designates 184.72.241.64 as permitted sender) smtp.mail=bounced.mailbox@itrp.com
+Received: from server.eu-west-1.itrp-example.com (server.eu-west-1.itrp-example.com [54.247.47.16])
+	by support.itrp.com (Postfix) with ESMTP id EF07B8FB2E
+	for <example.mailbox@itrp.com>; Mon,  9 Sep 2013 16:10:28 +0000 (UTC)
+Received: by server.eu-west-1.itrp-example.com (Postfix, from userid 1002)
+	id 8C5141D6; Mon,  9 Sep 2013 16:10:28 +0000 (UTC)
+Date: Mon, 09 Sep 2013 16:10:28 +0000
+From: Widget Data Center Service Desk <noreply@itrp.com>
+Reply-To: Widget Data Center Service Desk <wdc@itrp-example.com>
+To: Tom Edwards <example.mailbox@itrp.com>
+Message-ID: <change_1687_522df2f4261e7_3ce74574_e61b023d68bf@a.server.itrp.com>
+Subject: =?UTF-8?Q?=C3=84nderung_#1687_Provide_external_hard_disk_drive_--?=
+ ITRP example
+Mime-Version: 1.0
+Content-Type: multipart/alternative;
+ boundary="--==_mimepart_522df2f41e7cb_3ce8b3fa860765";
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Mailer: ITRP Mailer
+Auto-Submitted: auto-generated
+
+
+
+----==_mimepart_522df2f41e7cb_3ce8b3fa860765
+Date: Mon, 09 Sep 2013 16:10:28 +0000
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-ID: <522df2f46b625_3ce8b3fa8608c1@server.eu-west-1.itrp-example.com.mail>
+
+Hallo Tom Edwards,
+
+Howard Tanner =C3=A4nderte den Manager der folgenden =C3=84nderung auf Ho=
+ward Tanner:
+
+=C3=84nderung #1687 Provide external hard disk drive
+
+
+
+https://wdc.itrp-example.com/changes/1687
+
+Have a great day,
+
+Widget Data Center Service Desk
+Email: servicedesk@widget.com
+Phone: +1 (713) 987 2991
+Fax: +1 (713) 987 2992
+Website: http://www.widget.com/servicedesk=
+
+
+----==_mimepart_522df2f41e7cb_3ce8b3fa860765
+Date: Mon, 09 Sep 2013 16:10:28 +0000
+Mime-Version: 1.0
+Content-Type: text/html;
+ charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-ID: <522df2f47f3a5_3ce8b3fa8609ef@server.eu-west-1.itrp-example.com.mail>
+
+<html>
+<head><meta http-equiv=3D"content-type" content=3D"text/html; charset=3Du=
+tf-8"></head>
+<body>
+<p>Hallo Tom&#160;Edwards,</p>
+<p>Howard Tanner =C3=A4nderte den Manager der folgenden =C3=84nderung auf=
+ Howard&#160;Tanner:</p>
+<p>=C3=84nderung #1687 Provide external hard disk&#160;drive</p>
+<p><a target=3D"_blank" href=3D"https://wdc.itrp-example.com/changes/1687=
+">https://wdc.itrp-example.com/changes/1687</a></p>
+<p>Have a great&#160;day,</p>
+<p>Widget Data Center Service Desk<br/>
+Email: <a href=3D"mailto:servicedesk@widget.com">servicedesk@widget.com</=
+a><br/>
+Phone: +1 (713) 987 2991<br/>
+Fax: +1 (713) 987 2992<br/>
+Website:&#160;<a target=3D"_blank" href=3D"http://www.widget.com/serviced=
+esk">http://www.widget.com/servicedesk</a></p>
+</body>
+</html>=
+
+
+----==_mimepart_522df2f41e7cb_3ce8b3fa860765--

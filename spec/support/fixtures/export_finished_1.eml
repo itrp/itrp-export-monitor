@@ -1,0 +1,46 @@
+Delivered-To: example.mailbox@itrp.com
+Received: by 10.216.34.132 with SMTP id s4csp79014wea;
+        Wed, 11 Sep 2013 12:55:50 -0700 (PDT)
+X-Received: by 10.49.47.50 with SMTP id a18mr6347995qen.61.1378929349175;
+        Wed, 11 Sep 2013 12:55:49 -0700 (PDT)
+Return-Path: <bounced.mailbox@itrp.com>
+Received: from support.itrp.com (support.itrp.com. [184.72.241.64])
+        by mx.google.com with ESMTP id g9si10587817qez.109.1969.12.31.16.00.00;
+        Wed, 11 Sep 2013 12:55:48 -0700 (PDT)
+Received-SPF: pass (google.com: domain of bounced.mailbox@itrp.com designates 184.72.241.64 as permitted sender) client-ip=184.72.241.64;
+Authentication-Results: mx.google.com;
+       spf=pass (google.com: domain of bounced.mailbox@itrp.com designates 184.72.241.64 as permitted sender) smtp.mail=bounced.mailbox@itrp.com
+Received: from server.eu-west-1.itrp-example.com (server.eu-west-1.itrp-example.com [54.247.47.16])
+	by support.itrp.com (Postfix) with ESMTP id F2F908FBD5
+	for <example.mailbox@itrp.com>; Wed, 11 Sep 2013 19:55:47 +0000 (UTC)
+Received: by server.eu-west-1.itrp-example.com (Postfix, from userid 1002)
+	id 967DD524; Wed, 11 Sep 2013 19:55:47 +0000 (UTC)
+Date: Wed, 11 Sep 2013 19:55:47 +0000
+From: ITRP <noreply@itrp.com>
+Reply-To: ITRP <noreply@itrp.com>
+To: "howard.tanner@widget.com" <example.mailbox@itrp.com>
+Message-ID: <5230cac2b5b24_3c874544@server.itrp.com>
+Subject: Export finished - Full ad hoc export -- ITRP example
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="--==_mimepart_5230cac2aa941_3c88b3fa8606e7";
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Mailer: ITRP Mailer
+X-ITRP-Export: 0fad4fc0fd4a0130ad2a12313b0e50759969ab71899d2bb1d3e3d8f66e6e5133
+X-ITRP-ExportID: 2
+Auto-Submitted: auto-generated
+
+
+
+----==_mimepart_5230cac2aa941_3c88b3fa8606e7
+Date: Wed, 11 Sep 2013 19:55:47 +0000
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Content-ID: <5230cac31be86_3c88b3fa860734@server.eu-west-1.itrp-example.com.mail>
+
+The export is ready for download: https://itrp.amazonaws.com/exports/20130911/wdc/20130911-195545-affected_slas.csv?AWSAccessKeyId=AKIA&Signature=du%2B23ZUsrLng%3D&Expires=1379102146
+
+----==_mimepart_5230cac2aa941_3c88b3fa8606e7--

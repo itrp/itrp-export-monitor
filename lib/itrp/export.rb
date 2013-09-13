@@ -9,7 +9,7 @@ module Itrp
       has :logger, classes: ::Logger, default: ::Logger.new(STDOUT)
 
       has :name, classes: String
-      has :daemon, classes: [TrueClass, FalseClass], default: false
+      has :daemonize, classes: [TrueClass, FalseClass], default: false
       has :root, classes: String
       has :id, classes: Fixnum
       has :ids, classes: Array
