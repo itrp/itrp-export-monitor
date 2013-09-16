@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Itrp::Export::Mail do
+describe Itrp::Export::Monitor::Mail do
   before(:each) do
-    @export_mail = Itrp::Export::Mail.new(::Mail.new(File.read("#{@fixture_dir}/export_finished_1.eml")))
-    @non_export_mail = Itrp::Export::Mail.new(::Mail.new(File.read("#{@fixture_dir}/non_export.eml")))
+    @export_mail = Itrp::Export::Monitor::Mail.new(::Mail.new(File.read("#{@fixture_dir}/export_finished_1.eml")))
+    @non_export_mail = Itrp::Export::Monitor::Mail.new(::Mail.new(File.read("#{@fixture_dir}/non_export.eml")))
   end
 
   context 'exportID' do

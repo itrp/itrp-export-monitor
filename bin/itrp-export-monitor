@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+require 'rake'
+require 'bundler'
+
+raise "Bundler is required. Please install bundler with 'gem install bundler'" unless defined?(Bundler)
+
+# Example:
+#   itrp-export-monitor generate[<export_id>]
+
+# init dependencies
+Bundler.setup
+
+# init rake
+Rake.application.init
+
+# load the rake tasks
+gem_dir = File.expand_path('..',File.dirname(__FILE__))
+load "#{gem_dir}/lib/itrp/export/monitor/tasks/itrp_export_monitor.rake"
+
+# invoke the given task
+Rake.application.invoke_task("itrp_export_monitor:#{ARGV[0]}")

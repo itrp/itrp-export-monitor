@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'itrp/export/version'
+require 'itrp/export/monitor/version'
 
 Gem::Specification.new do |spec|
   spec.name                  = 'itrp-export-monitor'
-  spec.version               = Itrp::Export::VERSION
+  spec.version               = Itrp::Export::Monitor::VERSION
   spec.platform              = Gem::Platform::RUBY
   spec.required_ruby_version = '>= 1.9.3'
   spec.authors               = ['ITRP']
