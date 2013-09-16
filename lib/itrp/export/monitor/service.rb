@@ -9,7 +9,7 @@ require 'active_support/core_ext/object/try.rb'
 require 'active_support/core_ext/hash/indifferent_access'
 
 require 'clacks'
-require 'itrp'
+require 'itrp/client' # this will also load CA Certificate bundle
 
 require 'itrp/export/monitor'
 require 'itrp/export/monitor/clacks_fix'
