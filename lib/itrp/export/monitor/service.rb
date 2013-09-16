@@ -12,6 +12,7 @@ require 'clacks'
 require 'itrp'
 
 require 'itrp/export/monitor'
+require 'itrp/export/monitor/clacks_fix'
 require 'itrp/export/monitor/version'
 require 'itrp/export/monitor/mail'
 
