@@ -1,14 +1,16 @@
 # ITRP Export Monitor
 
 
-The itrp-export-monitor gem makes it easy to monitor a mailbox receiving [Scheduled Exports](http://help.itrp.com/help/export_fields) from ITRP and to store the incoming export files on disk or forward it to an FTP server.
+The itrp-export-monitor gem makes it easy to monitor a mailbox
+receiving [Scheduled Exports](http://help.itrp.com/help/export_fields) from ITRP
+and to store the incoming export files on disk or forward it to an FTP server.
 
-This readme will take you through all the steps of setting up an export monitor:
+This readme will take you through all the steps of setting up an Export Monitor:
 
 * [Install Ruby, bundler and create a Gemfile](#installation)
-* [Generate an export monitor](#generate-an-export-monitor)
+* [Generate an Export Monitor](#generate-an-export-monitor)
 * [Customize the configuration](#configuration)
-* [Start the export monitor](#start-the-export-monitor)
+* [Start the Export Monitor](#start-the-export-monitor)
 
 
 Installation
@@ -27,7 +29,7 @@ Installation
 4. Create a [`Gemfile`](http://bundler.io/v1.3/gemfile.html) in the *root directory* with the following contents:
    ```
    source 'https://rubygems.org'
-   
+
    gem 'itrp-export-monitor'
 
    ```
@@ -39,20 +41,25 @@ Installation
 Generate an Export Monitor
 --------------------------
 
-An export monitor is basically a ruby file that [configures](#configuration) the monitor and then fires it up to start looking for finished exports.
+An Export Monitor is basically a ruby file that [configures](#configuration) the monitor
+and then fires it up to start looking for finished exports.
 
 To help you create the ruby file, the following generator is available from the *root directory*:
 ```
 $ itrp-export-monitor generate[<export ID>,<email address>,<imap password>]
 ```
 
-The **export ID** is the unique identifier of the Scheduled Export in ITRP and can be found in the address bar of the browser when you view the Scheduled Export in ITRP at `https://<your domain>.itrp.com/exports`.
+The **export ID** is the unique identifier of the Scheduled Export in ITRP
+and can be found in the address bar of the browser when you view
+the Scheduled Export in ITRP at `https://<your domain>.itrp.com/exports`.
 
-The **email address** is the email address where the export file is sent to. This is the email address of the user defined in the *Run as* field.
+The **email address** is the email address where the export file is sent to.
+This is the email address of the user defined in the *Run as* field.
 
 The **password** is the password with which the IMAP server can be accessed for this email address.
 
-The default configuration is set up to work with [GMail](http://mail.google.com) and copies the downloaded export files to `/tmp/exports`.
+The default configuration is set up to work with [GMail](http://mail.google.com)
+and copies the downloaded export files to `/tmp/exports`.
 
 Below is an example of the generated configuration:
 
@@ -66,7 +73,7 @@ $ itrp-export-monitor generate[777,test.my.export@gmail.com,easy_to_gu3ss]
 ```
 require 'itrp/export/monitor'
 
-# the location where all the run-time information on the export monitor is stored
+# the location where all the run-time information on the Export Monitor is stored
 BASE_DIR = "/usr/local/itrp_exports/export_monitor_777"
 FileUtils.mkpath "#{BASE_DIR}/log"
 
@@ -96,7 +103,8 @@ Itrp::Export::Monitor.run
 Configuration
 -------------
 
-Before you [start the export monitor](#start-the-export-monitor) you need to customize the [generated configuration](#generate-an-export-monitor).
+Before you [start the Export Monitor](#start-the-export-monitor)
+you need to customize the [generated configuration](#generate-an-export-monitor).
 
 The Export Monitor configuration is defined using a block:
 ```
@@ -111,29 +119,147 @@ All options available:
 
 * _logger_:         The Ruby Logger instance, default: `Logger.new(STDOUT)`
 * _daemonize_:      Set to `true` to run in daemon mode; not available on Windows (default: `false`)
-* _root_:           **required** The root directory to store export monitor logs, pids and downloads
-* _id/ids_:         **required** The id(s) of the scheduled exports to monitor
-* _to_:             Location to store export files
+* _root_:           **required** The root directory to store Export Monitor logs, pids and downloads
+* _id/ids_:         **required** The id(s) of the Scheduled Exports to monitor
+* _to_:             Directory to store export files
 * _to_ftp_:         The address of the FTP server to sent the completed downloads to
 * _ftp_user_name_:  The user name to access the FTP server
 * _ftp_password_:   The password to access the FTP server
-* _imap_address_:   The address of the IMAP mail server (default: `imap.googlemail.com`)
+* _imap_address_:   **required** The address of the IMAP mail server (default: `imap.googlemail.com`)
 * _imap_port_:      The port of the IMAP mail server (default: `993`)
 * _imap_ssl_:       Set to +false+ to disabled SSL (default: `true`)
 * _imap_user_name_: **required** The user name to access the IMAP server
 * _imap_password_:  **required** The password to access the IMAP server
 * _imap_mailbox_:   The mailbox to monitor for ITRP export mails (default: `INBOX`)
 * _imap_archive_:   The archive mailbox to store the processed ITRP export mails (default: `[Gmail]/All Mail`)
-* _on_exception_:   A Proc that takes an exception and the mail as an argument. By default exceptions will be logged as errors in the logfile.
-
+* _on_exception_:   A Proc that takes an exception and the mail as an argument: `Proc.new{ |ex, mail| ... }`.
+All exceptions will also be logged as errors in the logfile.
 
 
 Start the Export Monitor
 ------------------------
 
-To start an export monitor simply run the following command:
+To start an Export Monitor simply run the following command:
 
 ```
 $ cd /usr/local/itrp_exports
 $ bundle exec ruby export_monitor.777.rb
 ```
+
+If all is well, the Export Monitor the monitor will startup and keep on running
+until it receives a *QUIT* signal (by pressing `<ctrl>-C`).
+
+If the monitor stops running immediately the configuration is probably not OK.
+Check the log file for the details on what is going wrong.
+
+On startup the following directory structure will be created for in the *export.root* directory:
+
+```
+/usr
+  /local
+    /itrp_exports
+      /export_monitor_777
+        /downloads
+          ...
+        /log
+          export_monitor.777.log
+        /pids
+          export_monitor.777.pid
+        /tmp
+          clacks_config.export_monitor.777.rb
+```
+
+The `downloads` subdirectory will contain all sucessfully downloaded export files. These files are not
+deleted automatically, so this directory may become quite large depending on your setup.
+
+The `log` directory contains the log file of the Export Monitor.
+
+The `pids` directory contains the pid file of the Export Monitor.
+
+The `tmp` directory contains temporary files to run the Export Monitor and should be left alone.
+
+
+Monitoring the Export Monitor
+-----------------------------
+
+The process ID of the Export Monitor will be stored in the `<root dir>/pids/export_monitor.<id>.pid` file.
+Tools like [Monit](http://mmonit.com/monit/) can be used to make sure the Export Monitor is running.
+
+When an incoming export could not be processed correctly, an error is logged in the logfile
+which is located in `<root dir>/log/export_monitor.<id>.log`.
+
+You should either watch this logfile for errors, or define a custom *on_exception* handler
+to take the [appropriate action](#recovering-from-errors).
+
+It is also possible to write a handler that sends out a mail to a systems mailbox using
+the [mail gem](https://github.com/mikel/mail). Something along the lines of:
+
+```
+Itrp::Export::Monitor.configure do |export|
+  ...
+  export.on_exception = Proc.new do |ex, mail|
+    Mail.deliver do
+      from    'export.monitor@mycompany.example.com'
+      to      'sysadmin@mycompany.example.com'
+      subject "Unable to process incoming export mail: #{mail.original.subject}"
+      body    ex.message
+    end
+  end
+end
+```
+
+#### Recovering from errors
+
+When an export mail could not be processed correctly:
+
+1. the error is logged in the logfile (once)
+2. the *on_exception* handler is called (once)
+3. the mail is left in the *imap_mailbox*
+
+After that the mail will not be processed again unless the Export Monitor is restarted.
+
+#### Disk usage
+
+All export files that are downloaded are kept in the `<export.root>/downloads` directory.
+These files are not deleted automatically, so you might want to add a job to cleanup this
+directory every month/year depending on your setup.
+
+
+Other considerations
+--------------------
+
+#### Not a dedicated mailbox?
+
+The Export Monitor will search all mails in the *imap_mailbox* for export mails sent by ITRP.
+When an export mail is found and the export ID matches one of the *ids* in the
+[configuration](#configuration), the mail is processed. Other mails in the same *imap_mailbox*
+are left alone.
+
+If there are a lot of mails kept in the mailbox the processing may slow down.
+It is advisable to create a separate user in ITRP with the Account Administrator role and
+it's own mailbox for processing exports.
+
+That user should then be selected as the *Run as* user in the Scheduled Export.
+
+#### IMAP
+
+All options starting with the *imap* prefix are used to access the mailbox to monitor incoming mails.
+By default the configuration is setup for [GMail](http://mail.google.com).
+
+Contact the System Administrator of your mailbox in case you are not sure how to setup the IMAP
+configuration.
+
+#### Multiple Scheduled Exports
+
+To monitor and process multiple Scheduled Exports simply provide all the export IDs to monitor
+in the [configuration](#configuration):
+
+```
+export.ids = [777, 785, 786]
+```
+
+#### Forwarding export mails
+
+Forwarded mails will not be processed as the Export Monitor depends on the ITRP
+[mail message headers](http://developer.itrp.com/v1/export/#downloading-an-export-file) to be available in the mail.
+When a mail is forwarded these headers may not be found and the export mail is not processed.
