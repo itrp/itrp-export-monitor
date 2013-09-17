@@ -32,6 +32,7 @@ module Itrp
               store_export(mail)
             rescue ::Exception => ex
               @failed_exports.add(mail.download_uri)
+              @logger.error { "Processing of mail '#{mail.original.subject}' failed: #{ex.message}\n  #{ex.backtrace.join("\n  ")}" }
               handle_exception(ex, mail)
               mail.ignore # leave mail in the mailbox
             end

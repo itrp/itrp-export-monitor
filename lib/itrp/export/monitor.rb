@@ -48,7 +48,7 @@ module Itrp
     #  - imap_password:  *required* The password to access the IMAP server
     #  - imap_mailbox:   The mailbox to monitor for ITRP export mails (default: 'INBOX')
     #  - imap_archive:   The archive mailbox to store the processed ITRP export mails (default: '[Gmail]/All Mail')
-    #  - on_exception:   A Proc that takes an exception and the mail as an argument.
+    #  - on_exception:   A Proc that takes an exception and the mail as an argument: Proc.new{ |ex, mail| ... }
     module Monitor
       include GemConfig::Base
 
@@ -74,7 +74,7 @@ module Itrp
         has :imap_mailbox, classes: String, default: 'INBOX'
         has :imap_archive, classes: String, default: '[Gmail]/All Mail'
 
-        has :on_exception, classes: Proc, default: Proc.new{ |ex, mail| Itrp::Export::Monitor.configuration.logger.error { "Processing of mail '#{mail.original.subject}' failed: #{ex.message}\n  #{ex.backtrace.join("\n  ")}" } }
+        has :on_exception, classes: Proc
       end
 
       class << self

@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 1.9.3'
   spec.authors               = ['ITRP']
   spec.email                 = %q{developers@itrp.com}
-  spec.description           = %q{Monitor a mailbox and store scheduled ITRP exports to disk}
-  spec.summary               = %q{Monitor a mailbox and store scheduled ITRP exports to disk}
+  spec.description           = %q{Monitor a mailbox and store Scheduled ITRP Exports to disk or FTP.}
+  spec.summary               = %q{The itrp-export-monitor gem makes it easy to monitor a mailbox receiving Scheduled Exports from ITRP and to store the incoming export files on disk or forward it to an FTP server.}
   spec.homepage              = 'http://help.itrp.com/help/import'
   spec.license               = 'MIT'
 

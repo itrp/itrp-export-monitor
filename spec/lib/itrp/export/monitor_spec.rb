@@ -23,7 +23,4 @@ describe Itrp::Export::Monitor do
     Itrp::Export::Monitor.logger.class.should == ::Logger
   end
 
-  it 'should define an on_exception proc' do
-    Itrp::Export::Monitor.configuration.on_exception.class.should == ::Proc
-  end
 end

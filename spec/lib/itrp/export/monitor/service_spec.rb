@@ -118,6 +118,7 @@ describe Itrp::Export::Monitor::Service do
 
     it 'should create a log entry when the on_exception handler fails' do
       exception = Exception.new('oops!')
+      allow(exception).to receive(:backtrace){ %w(trace back) }
       another_exception = Exception.new('oops again!')
       allow(another_exception).to receive(:backtrace){ %w(trace back) }
       exception_handler = Proc.new{}
@@ -128,6 +129,7 @@ describe Itrp::Export::Monitor::Service do
       expect(service).to receive(:store_export).and_raise(exception)
 
       expect_log("Processing ITRP Export mail:\n  Subject: Export finished - Full ad hoc export -- ITRP example\n  Export ID: 2\n  Token: #{@export_token}\n  URI: #{@export_uri}")
+      expect_log("Processing of mail 'Export finished - Full ad hoc export -- ITRP example' failed: oops!\n  trace\n  back", :error)
       expect_log("Exception occurred in exception handling: oops again!\n  trace\n  back", :error)
 
       service.process(@export_mail)
