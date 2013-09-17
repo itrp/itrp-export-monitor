@@ -84,7 +84,7 @@ Itrp::Export::Monitor.configure do |export|
   export.ids =    [777]
 
   export.to = '/tmp/exports'
-  # export.to_ftp =        'ftp://...'
+  # export.to_ftp =        'ftp.mycompany.com'
   # export.ftp_user_name = 'user'
   # export.ftp_password =  'secret'
 
@@ -123,7 +123,7 @@ All options available:
 * _root_:           **required** The root directory to store Export Monitor logs, pids and downloads
 * _id/ids_:         **required** The id(s) of the Scheduled Exports to monitor
 * _to_:             Directory to store export files
-* _to_ftp_:         The address of the FTP server to sent the completed downloads to
+* _to_ftp_:         The address of the FTP server to sent the completed downloads to (e.g. ftp.mycompany.com)
 * _ftp_user_name_:  The user name to access the FTP server
 * _ftp_password_:   The password to access the FTP server
 * _imap_address_:   **required** The address of the IMAP mail server (default: `imap.googlemail.com`)

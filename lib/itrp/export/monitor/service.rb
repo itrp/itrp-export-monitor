@@ -10,6 +10,7 @@ module Itrp
 
         def initialize
           @failed_exports = Set.new
+          @missing_export_ids = Set.new
           @options = Itrp::Export::Monitor.configuration.current
           @options[:ids] = (@options[:ids] || []) + [@options[:id]].flatten.compact.map(&:to_i)
           [:root, :ids, :imap_user_name, :imap_password].each do |required_option|
@@ -38,8 +39,11 @@ module Itrp
               mail.ignore # leave mail in the mailbox
             end
           else
-            @logger.info { mail.export_id ? "Skipping mail. ITRP Export ID #{mail.export_id} not configured for monitoring" : "Skipping mail. Not an ITRP Export mail: #{mail.original.subject}" }
             mail.ignore # leave mail in the mailbox
+            unless @missing_export_ids.include?(mail.export_id)
+              @missing_export_ids.add(mail.export_id)
+              @logger.info { mail.export_id ? "Skipping mail. ITRP Export ID #{mail.export_id} not configured for monitoring" : "Skipping mail. Not an ITRP Export mail: #{mail.original.subject}" }
+            end
           end
         end
 
