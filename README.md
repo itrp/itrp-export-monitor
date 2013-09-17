@@ -3,7 +3,7 @@
 
 The itrp-export-monitor gem makes it easy to monitor a mailbox
 receiving [Scheduled Exports](http://help.itrp.com/help/export_fields) from ITRP
-and to store the incoming export files on disk or forward it to an FTP server.
+and to store the incoming export files on disk or forward them to an FTP server.
 
 This readme will take you through all the steps of setting up an Export Monitor:
 
@@ -11,6 +11,7 @@ This readme will take you through all the steps of setting up an Export Monitor:
 * [Generate an Export Monitor](#generate-an-export-monitor)
 * [Customize the configuration](#configuration)
 * [Start the Export Monitor](#start-the-export-monitor)
+* [Monitor the Export Monitor](#monitor-the-export-monitor)
 
 
 Installation
@@ -42,7 +43,7 @@ Generate an Export Monitor
 --------------------------
 
 An Export Monitor is basically a ruby file that [configures](#configuration) the monitor
-and then fires it up to start looking for finished exports.
+and then fires it up to start looking for finished exports in the mailbox.
 
 To help you create the ruby file, the following generator is available from the *root directory*:
 ```
@@ -59,7 +60,7 @@ This is the email address of the user defined in the *Run as* field.
 The **password** is the password with which the IMAP server can be accessed for this email address.
 
 The default configuration is set up to work with [GMail](http://mail.google.com)
-and copies the downloaded export files to `/tmp/exports`.
+and copies completed export files to `/tmp/exports`.
 
 Below is an example of the generated configuration:
 
@@ -146,11 +147,11 @@ $ cd /usr/local/itrp_exports
 $ bundle exec ruby export_monitor.777.rb
 ```
 
-If all is well, the Export Monitor the monitor will startup and keep on running
-until it receives a *QUIT* signal (by pressing `<ctrl>-C`).
+If the configuration is correct, the Export Monitor will startup and keep on running until it
+receives a *QUIT* signal (by pressing `<ctrl>-C`).
 
-If the monitor stops running immediately the configuration is probably not OK.
-Check the log file for the details on what is going wrong.
+If the Export Monitor stops running immediately the configuration is probably incorrect.
+The log file will contain the details on what went wrong.
 
 On startup the following directory structure will be created for in the *export.root* directory:
 
@@ -169,8 +170,8 @@ On startup the following directory structure will be created for in the *export.
           clacks_config.export_monitor.777.rb
 ```
 
-The `downloads` subdirectory will contain all sucessfully downloaded export files. These files are not
-deleted automatically, so this directory may become quite large depending on your setup.
+The `downloads` subdirectory contains the downloaded csv/zip files. These files are not
+deleted automatically, so it is advisable to [monitor the disk usage](#disk-usage).
 
 The `log` directory contains the log file of the Export Monitor.
 
@@ -183,16 +184,14 @@ Monitoring the Export Monitor
 -----------------------------
 
 The process ID of the Export Monitor will be stored in the `<root dir>/pids/export_monitor.<id>.pid` file.
-Tools like [Monit](http://mmonit.com/monit/) can be used to make sure the Export Monitor is running.
+Tools like [Monit](http://mmonit.com/monit/) can be used to make sure the Export Monitor is always running.
 
 When an incoming export could not be processed correctly, an error is logged in the logfile
-which is located in `<root dir>/log/export_monitor.<id>.log`.
+which is located in `<root dir>/log/export_monitor.<id>.log`. You should either watch this logfile for
+errors, or define a custom *on_exception* handler to take the [appropriate action](#recovering-from-errors).
 
-You should either watch this logfile for errors, or define a custom *on_exception* handler
-to take the [appropriate action](#recovering-from-errors).
-
-It is also possible to write a handler that sends out a mail to a systems mailbox using
-the [mail gem](https://github.com/mikel/mail). Something along the lines of:
+Below is an example of an *on_exception* handler sending a mail to a systems mailbox using
+the [mail gem](https://github.com/mikel/mail).
 
 ```
 Itrp::Export::Monitor.configure do |export|
@@ -220,7 +219,7 @@ After that the mail will not be processed again unless the Export Monitor is res
 
 #### Disk usage
 
-All export files that are downloaded are kept in the `<export.root>/downloads` directory.
+All export files that are downloaded are kept in the `<export.root>/downloads` directory. 
 These files are not deleted automatically, so you might want to add a job to cleanup this
 directory every month/year depending on your setup.
 
@@ -263,3 +262,12 @@ export.ids = [777, 785, 786]
 Forwarded mails will not be processed as the Export Monitor depends on the ITRP
 [mail message headers](http://developer.itrp.com/v1/export/#downloading-an-export-file) to be available in the mail.
 When a mail is forwarded these headers may not be found and the export mail is not processed.
+
+#### Export files that are partially copied
+
+To prevent issues with partial files the export monitor will append `.in_progress` to export files
+that are being copied/FTP'd. Once the copy is completed, the file is renamed and the `.in_progress` suffix
+is removed.
+
+Another way to prevent issues with partially copied files is to try to obtain a write lock on the file
+before processing the export file. The OS will return an error when the file is not completely copied.
