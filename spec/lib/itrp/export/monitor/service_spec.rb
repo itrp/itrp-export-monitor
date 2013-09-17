@@ -95,6 +95,15 @@ describe Itrp::Export::Monitor::Service do
       @service.process(@export_mail)
     end
 
+    it 'should not process a failed mail again' do
+      # raise exception with specific backtrace
+      exception = Exception.new('oops!')
+      expect(@service).to receive(:store_export).once.and_raise(exception)
+
+      @service.process(@export_mail)
+      @service.process(@export_mail)
+    end
+
     it 'should call the on_exception handler' do
       exception = Exception.new('oops!')
       exception_handler = Proc.new{}

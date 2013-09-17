@@ -9,6 +9,7 @@ module Itrp
       class Service
 
         def initialize
+          @failed_exports = Set.new
           @options = Itrp::Export::Monitor.configuration.current
           @options[:ids] = (@options[:ids] || []) + [@options[:id]].flatten.compact.map(&:to_i)
           [:root, :ids, :imap_user_name, :imap_password].each do |required_option|
@@ -24,11 +25,13 @@ module Itrp
 
         def process(mail)
           mail = Itrp::Export::Monitor::Mail.new(mail)
-          if option(:ids).include?(mail.export_id)
+          # the export_id must be monitored and the download should not have failed before
+          if option(:ids).include?(mail.export_id) && !@failed_exports.include?(mail.download_uri)
             begin
               @logger.info { "Processing ITRP Export mail:\n  Subject: #{mail.original.subject}\n  Export ID: #{mail.export_id}\n  Token: #{mail.token}\n  URI: #{mail.download_uri}" }
               store_export(mail)
             rescue ::Exception => ex
+              @failed_exports.add(mail.download_uri)
               handle_exception(ex, mail)
               mail.ignore # leave mail in the mailbox
             end
