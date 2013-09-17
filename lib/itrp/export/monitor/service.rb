@@ -25,8 +25,9 @@ module Itrp
 
         def process(mail)
           mail = Itrp::Export::Monitor::Mail.new(mail)
-          # the export_id must be monitored and the download should not have failed before
-          if option(:ids).include?(mail.export_id) && !@failed_exports.include?(mail.download_uri)
+          return if @failed_exports.include?(mail.download_uri)
+
+          if option(:ids).include?(mail.export_id)
             begin
               @logger.info { "Processing ITRP Export mail:\n  Subject: #{mail.original.subject}\n  Export ID: #{mail.export_id}\n  Token: #{mail.token}\n  URI: #{mail.download_uri}" }
               store_export(mail)
