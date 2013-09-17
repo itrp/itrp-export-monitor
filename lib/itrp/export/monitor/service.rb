@@ -11,7 +11,7 @@ module Itrp
         def initialize
           @options = Itrp::Export::Monitor.configuration.current
           @options[:ids] = (@options[:ids] || []) + [@options[:id]].flatten.compact.map(&:to_i)
-          [:name, :root, :ids, :imap_user_name, :imap_password].each do |required_option|
+          [:root, :ids, :imap_user_name, :imap_password].each do |required_option|
             raise ::Itrp::Exception.new("Missing required configuration option #{required_option}") if option(required_option).blank?
           end
           @logger = @options[:logger]

@@ -6,7 +6,6 @@ describe Itrp::Export::Monitor::Service do
     Itrp::Export::Monitor.configure do |export|
       export.root = "#{@spec_dir}/tmp/exports"
       export.ids = [1, 2]
-      export.name = "export.1.2"
       export.to = "#{@spec_dir}/tmp/copy_to"
 
       export.to_ftp =        'ftp://ftp.example.com:888'
@@ -43,7 +42,7 @@ describe Itrp::Export::Monitor::Service do
       monitor.option(:ids).should == [1,2,3]
     end
 
-    [:name, :root, :ids, :imap_user_name, :imap_password].each do |required_option|
+    [:root, :ids, :imap_user_name, :imap_password].each do |required_option|
       it "should raise an exception is the required option #{required_option} is missing" do
         Itrp::Export::Monitor.configuration.send(:"#{required_option}=", required_option == :ids ? [] : '')
         expect{ Itrp::Export::Monitor::Service.new }.to raise_error(::Itrp::Exception, "Missing required configuration option #{required_option}")

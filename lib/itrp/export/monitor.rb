@@ -55,7 +55,6 @@ module Itrp
       with_configuration do
         has :logger, classes: ::Logger, default: ::Logger.new(STDOUT)
 
-        has :name, classes: String
         has :daemonize, classes: [TrueClass, FalseClass], default: false
         has :root, classes: String
         has :id, classes: Fixnum

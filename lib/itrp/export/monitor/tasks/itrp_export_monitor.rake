@@ -6,7 +6,7 @@ namespace :itrp_export_monitor do
     check_required_args(args, [:export_id, :email_address, :imap_password], GENERATE_HELP)
     monitor_name = "export_monitor.#{args.export_id}"
     File.open("#{Dir.pwd}/#{monitor_name}.rb", 'w'){ |f| f.write(<<EOF) }
-require 'itrp/export/monitor/service'
+require 'itrp/export/monitor'
 
 # the location where all the run-time information on the export monitor is stored
 BASE_DIR = "#{Dir.pwd}/#{monitor_name.gsub('.', '_')}"
@@ -16,7 +16,6 @@ Itrp::Export::Monitor.configure do |export|
   export.root = BASE_DIR
   export.logger = Logger.new("\#{BASE_DIR}/log/#{monitor_name}.log")
   export.ids =    [#{args.export_id}]
-  export.name =   "export.#{args.export_id}"
 
   export.to = '/tmp/exports'
   # export.to_ftp =        'ftp://...'
@@ -38,7 +37,7 @@ EOF
     $stdout.puts "\nEdit the file and:"
     $stdout.puts " - fill in the IMAP details to connect to the mailbox that receives the ITRP Export mails"
     $stdout.puts " - specify the directory or FTP server to sent the export files to"
-    $stdout.puts "\nStart the export monitor service as follows:"
+    $stdout.puts "\nStart the export monitor as follows:"
     $stdout.puts " $ bundle exec ruby #{monitor_name}.rb"
     $stdout.puts "\nFor more information and all available options look at the itrp-export-monitor gem documentation online.\n\n"
   end
