@@ -29,12 +29,11 @@ describe Itrp::Export::Monitor::Service do
       Itrp::Export::Monitor::Service.any_instance.stub(:generate_clacks_config){ 'clacks_config_file.rb' }
       expect(Clacks::Command).to receive(:new).with(['-c', 'clacks_config_file.rb', '-D']) { double(exec: 'started') }
 
-      monitor = Itrp::Export::Monitor::Service.run
+      service = Itrp::Export::Monitor.run
 
-      expect(monitor).to receive(:process).with('mail')
-      Itrp::Export::Monitor::Service.process('mail')
+      expect(service).to receive(:process).with('mail')
+      Itrp::Export::Monitor.process('mail')
     end
-
   end
 
   context 'initialize' do
@@ -74,14 +73,14 @@ describe Itrp::Export::Monitor::Service do
       @export_mail = ::Mail.new(File.read("#{@fixture_dir}/export_finished_1.eml"))
       @non_export_mail = ::Mail.new(File.read("#{@fixture_dir}/non_export.eml"))
 
-      @monitor = Itrp::Export::Monitor::Service.new
+      @service = Itrp::Export::Monitor::Service.new
     end
 
     it 'should store export mails' do
       expect_log("Processing ITRP Export mail:\n  Subject: Export finished - Full ad hoc export -- ITRP example\n  Export ID: 2\n  Token: #{@export_token}\n  URI: #{@export_uri}")
-      expect(@monitor).to receive(:store_export).with{ |export_mail| export_mail.original.should == @export_mail }
+      expect(@service).to receive(:store_export).with{ |export_mail| export_mail.original.should == @export_mail }
 
-      @monitor.process(@export_mail)
+      @service.process(@export_mail)
     end
 
     it 'should skip mails when an exception occurs' do
@@ -89,19 +88,48 @@ describe Itrp::Export::Monitor::Service do
       expect_log("Processing ITRP Export mail:\n  Subject: Export finished - Full ad hoc export -- ITRP example\n  Export ID: 2\n  Token: #{@export_token}\n  URI: #{@export_uri}")
       # raise exception with specific backtrace
       exception = Exception.new('oops!')
-      allow(exception).to receive(:backtrace){ ['trace', 'back'] }
-      expect(@monitor).to receive(:store_export).and_raise(exception)
+      allow(exception).to receive(:backtrace){ %w(trace back) }
+      expect(@service).to receive(:store_export).and_raise(exception)
       # expect the error to be logged
-      expect_log("Processing failed: oops!\n  trace\n  back", :error)
+      expect_log("Processing of mail 'Export finished - Full ad hoc export -- ITRP example' failed: oops!\n  trace\n  back", :error)
 
-      @monitor.process(@export_mail)
+      @service.process(@export_mail)
+    end
+
+    it 'should call the on_exception handler' do
+      exception = Exception.new('oops!')
+      exception_handler = Proc.new{}
+      expect(exception_handler).to receive(:call).with(exception, kind_of(Itrp::Export::Monitor::Mail)).once
+
+      Itrp::Export::Monitor.configuration.on_exception = exception_handler
+      service = Itrp::Export::Monitor::Service.new
+      expect(service).to receive(:store_export).and_raise(exception)
+
+      service.process(@export_mail)
+    end
+
+    it 'should create a log entry when the on_exception handler fails' do
+      exception = Exception.new('oops!')
+      another_exception = Exception.new('oops again!')
+      allow(another_exception).to receive(:backtrace){ %w(trace back) }
+      exception_handler = Proc.new{}
+      expect(exception_handler).to receive(:call).with(exception, kind_of(Itrp::Export::Monitor::Mail)).and_raise(another_exception)
+
+      Itrp::Export::Monitor.configuration.on_exception = exception_handler
+      service = Itrp::Export::Monitor::Service.new
+      expect(service).to receive(:store_export).and_raise(exception)
+
+      expect_log("Processing ITRP Export mail:\n  Subject: Export finished - Full ad hoc export -- ITRP example\n  Export ID: 2\n  Token: #{@export_token}\n  URI: #{@export_uri}")
+      expect_log("Exception occurred in exception handling: oops again!\n  trace\n  back", :error)
+
+      service.process(@export_mail)
     end
 
     it 'should skip non export mails' do
       expect(@non_export_mail).to receive(:skip_deletion).once
       expect_log("Skipping mail. Not an ITRP Export mail: \u00C4nderung #1687 Provide external hard disk drive -- ITRP example")
 
-      @monitor.process(@non_export_mail)
+      @service.process(@non_export_mail)
     end
 
     it 'should skip non-monitored export ids' do
@@ -121,26 +149,26 @@ describe Itrp::Export::Monitor::Service do
       end
 
       it 'should download the export file to disk' do
-        expect(@monitor).to receive(:copy_export)
-        expect(@monitor).to receive(:ftp_export)
-        @monitor.process(@export_mail)
+        expect(@service).to receive(:copy_export)
+        expect(@service).to receive(:ftp_export)
+        @service.process(@export_mail)
 
         File.read(@local_filename).should == 'exported content'
       end
 
       it 'should copy the export file to another location' do
-        expect(@monitor).to receive(:ftp_export)
+        expect(@service).to receive(:ftp_export)
         expect_log("Processing ITRP Export mail:\n  Subject: Export finished - Full ad hoc export -- ITRP example\n  Export ID: 2\n  Token: #{@export_token}\n  URI: #{@export_uri}")
         expect_log("Copied export '#{@local_filename}' to '#{Itrp::Export::Monitor.configuration.to}/20130911-195545-affected_slas.csv'")
 
-        @monitor.process(@export_mail)
+        @service.process(@export_mail)
 
         File.read(@local_filename).should == 'exported content'
         File.read("#{Itrp::Export::Monitor.configuration.to}/20130911-195545-affected_slas.csv").should == 'exported content'
       end
 
       it 'should FTP the export file' do
-        expect(@monitor).to receive(:copy_export)
+        expect(@service).to receive(:copy_export)
         expect_log("Processing ITRP Export mail:\n  Subject: Export finished - Full ad hoc export -- ITRP example\n  Export ID: 2\n  Token: #{@export_token}\n  URI: #{@export_uri}")
         expect_log("FTP export '#{@local_filename}' to '#{Itrp::Export::Monitor.configuration.to_ftp}/20130911-195545-affected_slas.csv'")
 
@@ -149,7 +177,7 @@ describe Itrp::Export::Monitor::Service do
         expect(ftp).to receive(:rename).with('20130911-195545-affected_slas.csv.in_progress', '20130911-195545-affected_slas.csv')
         expect(Net::FTP).to receive(:open).with('ftp://ftp.example.com:888', 'ftp user', 'ftp password').and_yield(ftp)
 
-        @monitor.process(@export_mail)
+        @service.process(@export_mail)
 
         File.read(@local_filename).should == 'exported content'
       end
@@ -185,7 +213,7 @@ find_options({
 })
 
 on_mail do |mail|
-  Itrp::Export::Monitor::Service.process(mail)
+  Itrp::Export::Monitor.process(mail)
 end
 OEF
   end

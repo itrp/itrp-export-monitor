@@ -32,7 +32,7 @@ Itrp::Export::Monitor.configure do |export|
   export.imap_archive =    '[Gmail]/All Mail'
 end
 
-Itrp::Export::Monitor::Service.run
+Itrp::Export::Monitor.run
 EOF
     $stdout.puts "\nGenerated '#{Dir.pwd}/#{monitor_name}.rb'."
     $stdout.puts "\nEdit the file and:"

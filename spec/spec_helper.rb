@@ -11,7 +11,7 @@ SimpleCov.start
 require 'rspec'
 require 'webmock/rspec'
 
-require 'itrp/export/monitor/service'
+require 'itrp/export/monitor'
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.

@@ -1,76 +1,12 @@
 require 'fileutils'
-require 'mail'
 require 'open-uri'
 require 'net/ftp'
-
-require 'active_support/core_ext/module/aliasing.rb'
-require 'active_support/core_ext/object/blank'
-require 'active_support/core_ext/object/try.rb'
-require 'active_support/core_ext/hash/indifferent_access'
-
-require 'clacks'
-require 'itrp/client' # this will also load CA Certificate bundle
-
-require 'itrp/export/monitor'
-require 'itrp/export/monitor/clacks_fix'
-require 'itrp/export/monitor/version'
-require 'itrp/export/monitor/mail'
 
 module Itrp
   module Export
     module Monitor
 
-      # Configuration for ITRP Export:
-      #   Itrp::Export.configure do |export|
-      #     export.name           = 'people_export'
-      #     export.root           = File.expand_path('../exports', __FILE__)
-      #     export.id             = 8713
-      #     export.to             = "#{export.root}/people"
-      #     export.imap_user_name = 'test.exports@gmail.com'
-      #     export.imap_password  = 'secret'
-      #     ...
-      #   end
-      #
-      # Start the ITRP Export Monitor:
-      #   Itrp::Export::Monitor.run
-      #
-      # All options available:
-      #  - logger:         The Ruby Logger instance, default: Logger.new(STDOUT)
-      #  - daemonize:      Set to +true+ to run in daemon mode; not available on Windows (default: false)
-      #  - name:           *required* The name of the export
-      #  - root:           *required* The root directory to store export monitor logs, pids and downloads
-      #  - id/ids:         *required* The id(s) of the scheduled exports to monitor
-      #  - to:             Location to store export files (default = <root>/ready)
-      #  - to_ftp:         The address of the FTP server to sent the completed downloads to
-      #  - ftp_user_name:  The user name to access the FTP server
-      #  - ftp_password:   The password to access the FTP server
-      #  - imap_address:   The address of the IMAP mail server (default: 'imap.googlemail.com')
-      #  - imap_port:      The port of the IMAP mail server (default: 993)
-      #  - imap_ssl:       Set to +false+ to disabled SSL (default: true)
-      #  - imap_user_name: *required* The user name to access the IMAP server
-      #  - imap_password:  *required* The password to access the IMAP server
-      #  - imap_mailbox:   The mailbox to monitor for ITRP export mails (default: 'INBOX')
-      #  - imap_archive:   The archive mailbox to store the processed ITRP export mails (default: '[Gmail]/All Mail')
       class Service
-
-        class << self
-          def run
-            # create the export monitor as a singleton
-            @singleton = Itrp::Export::Monitor::Service.new
-            # generate clacks file
-            clacks_config_filename = @singleton.generate_clacks_config
-            # start clacks with the generated config
-            args = ['-c', clacks_config_filename]
-            args << '-D' if @singleton.option(:daemonize)
-            Clacks::Command.new(args).exec
-            # returns the singleton instance
-            @singleton
-          end
-
-          def process(mail)
-            @singleton.process(mail)
-          end
-        end
 
         def initialize
           @options = Itrp::Export::Monitor.configuration.current
@@ -93,7 +29,7 @@ module Itrp
               @logger.info { "Processing ITRP Export mail:\n  Subject: #{mail.original.subject}\n  Export ID: #{mail.export_id}\n  Token: #{mail.token}\n  URI: #{mail.download_uri}" }
               store_export(mail)
             rescue ::Exception => ex
-              @logger.error { "Processing failed: #{ex.message}\n  #{ex.backtrace.join("\n  ")}" }
+              handle_exception(ex, mail)
               mail.ignore # leave mail in the mailbox
             end
           else
@@ -130,7 +66,7 @@ find_options({
 })
 
 on_mail do |mail|
-  Itrp::Export::Monitor::Service.process(mail)
+  Itrp::Export::Monitor.process(mail)
 end
 EOF
           end
@@ -179,6 +115,17 @@ EOF
 
         def monitor_id
           @monitor_id ||= "export_monitor.#{option(:ids).map(&:to_s).join('.')}"
+        end
+
+        def handle_exception(ex, mail)
+          proc = option(:on_exception)
+          if proc
+            begin
+              proc.call(ex, mail)
+            rescue ::Exception => another_exception
+              @logger.error { "Exception occurred in exception handling: #{another_exception.message}\n  #{another_exception.backtrace.join("\n  ")}" }
+            end
+          end
         end
       end
     end

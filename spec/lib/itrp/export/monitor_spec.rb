@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe Itrp::Export::Monitor do
-  it "should define a default configuration" do
+  it 'should define a default configuration' do
     conf = Itrp::Export::Monitor.configuration.current
 
-    conf.keys.sort.should == [:daemonize, :ftp_password, :ftp_user_name, :id, :ids, :imap_address, :imap_archive, :imap_mailbox, :imap_password, :imap_port, :imap_ssl, :imap_user_name, :logger, :name, :root, :to, :to_ftp]
+    conf.keys.sort.should == [:daemonize, :ftp_password, :ftp_user_name, :id, :ids, :imap_address, :imap_archive, :imap_mailbox, :imap_password, :imap_port, :imap_ssl, :imap_user_name, :logger, :name, :on_exception, :root, :to, :to_ftp]
 
     conf[:logger].class.should == ::Logger
     conf[:daemonize].should == false
@@ -19,7 +19,11 @@ describe Itrp::Export::Monitor do
     end
   end
 
-  it "should define a logger" do
+  it 'should define a logger' do
     Itrp::Export::Monitor.logger.class.should == ::Logger
+  end
+
+  it 'should define an on_exception proc' do
+    Itrp::Export::Monitor.configuration.on_exception.class.should == ::Proc
   end
 end
