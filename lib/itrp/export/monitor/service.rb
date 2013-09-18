@@ -95,7 +95,7 @@ EOF
 
         def download_export(mail)
           local_filename = "#{dir(:downloads)}/#{mail.filename}"
-          File.open(local_filename, 'w') { |f| f.binmode; f.write(open(mail.download_uri).read) }
+          File.open(local_filename, 'wb') { |f| f.write(open(mail.download_uri).read) }
           local_filename
         end
 
