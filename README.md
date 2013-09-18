@@ -56,10 +56,11 @@ the Scheduled Export in ITRP at `https://<your domain>.itrp.com/exports`.
 
 The **email address** is the email address where the export file is sent to.
 This is the email address of the user defined in the *Run as* field.
+**We strongly recommend to [create a separate mailbox](setup-a-mailbox) for the export monitor.**
 
 The **password** is the password with which the IMAP server can be accessed for this email address.
 
-The default configuration is set up to work with [GMail](http://mail.google.com)
+The default configuration is set up to work with [GMail](http://mail.google.com) (in English)
 and copies completed export files to `/tmp/exports`.
 
 Below is an example of the generated configuration:
@@ -151,9 +152,15 @@ If the configuration is correct, the Export Monitor will startup and keep on run
 receives a *QUIT* signal (by pressing `<ctrl>-C`).
 
 If the Export Monitor stops running immediately the configuration is probably incorrect.
-The log file will contain the details on what went wrong.
+The log file will contain the details on what went wrong, see:
+```
+$ less /usr/local/itrp_exports/export_monitor_777/log/export_monitor.777.log
+```
 
-On startup the following directory structure will be created for in the *export.root* directory:
+If the Export Monitor is running, but the exports are not picked up and processed as expected, also check
+the log file first.
+
+On startup the following directory structure will be created in the *export.root* directory:
 
 ```
 /usr
@@ -219,13 +226,17 @@ After that the mail will not be processed again unless the Export Monitor is res
 
 #### Disk usage
 
-All export files that are downloaded are kept in the `<export.root>/downloads` directory. 
+All export files that are downloaded are kept in the `<export.root>/downloads` directory.
 These files are not deleted automatically, so you might want to add a job to cleanup this
 directory every month/year depending on your setup.
 
 
 Other considerations
 --------------------
+
+#### Setup a mailbox
+
+!!!!
 
 #### Not a dedicated mailbox?
 
