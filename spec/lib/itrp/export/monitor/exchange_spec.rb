@@ -46,10 +46,10 @@ describe Itrp::Export::Monitor::Exchange do
 
       @exchange.transfer
 
-      File.read("#{@options[:to]}/5-20130923-072312-calendars.csv").should include( %(30,,,24x7 except Sunday 5:00am until Noon,mon,00:00,24:00))
-      File.read("#{@options[:to]}/5-20130923-072312-organizations.csv").should include( %(5,,,0,Widget Data Center,1,Widget Data Center,NA,,,"Widget Data Center provides IT services to the subsidiaries of Widget International, Corp."))
-      File.read("#{@options[:to]}/5-20130923-072312-organizations_contact_details.csv").should include( %(International Business Machines Corporation (IBM),,,,street,590 Madison Avenue,New York,NY,10022,US,0))
-      File.read("#{@options[:to]}/5-20130923-072312-sites.csv").should include( %(14,,,0,IT Training Facility,"4465 San Felipe Street, Suite 1508",Houston,TX,77027,US,Central Time (US & Canada),))
+      File.read("#{@options[:to]}/5-20130923-072312-calendars.csv").should include( %(30,,,24x7 except Sunday 5:00am until Noon,mon,00:00,24:00\n))
+      File.read("#{@options[:to]}/5-20130923-072312-organizations.csv").should include( %(27,,,0,Microsoft Corporation,0,,,,,"Global product licensing sales contact for Widget International, Corp.: Brian Waymore\nEmail: brian.waymore@microsoft.com"\n))
+      File.read("#{@options[:to]}/5-20130923-072312-organizations_contact_details.csv").should include( %(International Business Machines Corporation (IBM),,,,street,590 Madison Avenue,New York,NY,10022,US,0\n))
+      File.read("#{@options[:to]}/5-20130923-072312-sites.csv").should include( %(14,,,0,IT Training Facility,"4465 San Felipe Street, Suite 1508",Houston,TX,77027,US,Central Time (US & Canada),\n))
     end
 
     it 'should unzip to FTP' do
@@ -77,9 +77,9 @@ describe Itrp::Export::Monitor::Exchange do
 
         @exchange.transfer
 
-        File.read("#{@options[:to]}/calendars/5-20130923-072312-calendars.csv").should include( %(30,,,24x7 except Sunday 5:00am until Noon,mon,00:00,24:00))
-        File.read("#{@options[:to]}/organizations/5-20130923-072312-organizations.csv").should include( %(5,,,0,Widget Data Center,1,Widget Data Center,NA,,,"Widget Data Center provides IT services to the subsidiaries of Widget International, Corp."))
-        File.read("#{@options[:to]}/organizations_contact_details/5-20130923-072312-organizations_contact_details.csv").should include( %(International Business Machines Corporation (IBM),,,,street,590 Madison Avenue,New York,NY,10022,US,0))
+        File.read("#{@options[:to]}/calendars/5-20130923-072312-calendars.csv").should include( %(30,,,24x7 except Sunday 5:00am until Noon,mon,00:00,24:00\n))
+        File.read("#{@options[:to]}/organizations/5-20130923-072312-organizations.csv").should include( %(27,,,0,Microsoft Corporation,0,,,,,"Global product licensing sales contact for Widget International, Corp.: Brian Waymore\nEmail: brian.waymore@microsoft.com"\n))
+        File.read("#{@options[:to]}/organizations_contact_details/5-20130923-072312-organizations_contact_details.csv").should include( %(International Business Machines Corporation (IBM),,,,street,590 Madison Avenue,New York,NY,10022,US,0\n))
         File.read("#{@options[:to]}/sites/5-20130923-072312-sites.csv").should include( %(14,,,0,IT Training Facility,"4465 San Felipe Street, Suite 1508",Houston,TX,77027,US,Central Time (US & Canada),))
       end
 
@@ -105,9 +105,30 @@ describe Itrp::Export::Monitor::Exchange do
         @exchange.transfer
       end
     end
+
+    context 'csv conversion' do
+      before(:each) do
+        @exchange.options[:csv_row_sep] = "##\n"
+        @exchange.options[:csv_col_sep] = '|'
+        @exchange.options[:csv_quote_char] = ':'
+        @exchange.options[:csv_value_proc] = Proc.new{ |value| value.gsub(/\r?\n/, '<newline>') }
+      end
+
+      it 'should convert all CSV files' do
+        @exchange.options[:to_ftp] = nil
+        expect_log("Copied 4 file(s) from '#{@exchange.fullpath}' to '#{@options[:to]}'")
+
+        @exchange.transfer
+
+        File.read("#{@options[:to]}/5-20130923-072312-calendars.csv").should include( %(30|::|::|:24x7 except Sunday 5::00am until Noon:|mon|:00::00:|:24::00:##\n))
+        File.read("#{@options[:to]}/5-20130923-072312-organizations.csv").should include( %(27|::|::|0|Microsoft Corporation|0|::|::|::|::|:Global product licensing sales contact for Widget International, Corp.:: Brian Waymore<newline>Email:: brian.waymore@microsoft.com:##\n))
+        File.read("#{@options[:to]}/5-20130923-072312-organizations_contact_details.csv").should include( %(International Business Machines Corporation (IBM)|::|::|::|street|590 Madison Avenue|New York|NY|10022|US|0##\n))
+        File.read("#{@options[:to]}/5-20130923-072312-sites.csv").should include( %(14|::|::|0|IT Training Facility|4465 San Felipe Street, Suite 1508|Houston|TX|77027|US|Central Time (US & Canada)|::##))
+      end
+    end
   end
 
-  context 'copy' do
+  context 'local transfer' do
     before(:each) do
       @options[:to_ftp] = nil
       @exchange = exchange()
@@ -122,7 +143,7 @@ describe Itrp::Export::Monitor::Exchange do
     end
   end
 
-  context 'ftp' do
+  context 'ftp transfer' do
     before(:each) do
       @options[:to] = nil
       @exchange = exchange()

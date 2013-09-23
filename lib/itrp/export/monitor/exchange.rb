@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'net/ftp'
 require 'zip'
+require 'csv'
 
 module Itrp
   module Export
@@ -33,8 +34,12 @@ module Itrp
         def transfer_files
           # unzip if needed
           files = option(:unzip) && @fullpath =~ /\.zip$/ ? unzip : {@fullpath => @basename}
-          # prepend the export type as a subdirectory in the target path
-          files.each_value{ |target| target.insert(0, "#{target[/.*-(.*)\.csv$/, 1]}/")} if option(:sub_dirs)
+          if option(:unzip)
+            # prepend the export type as a subdirectory in the target path
+            files.each_value{ |target| target.insert(0, "#{target[/.*-(.*)\.csv$/, 1]}/")} if option(:sub_dirs)
+            # convert the CSV files
+            files.each_key{ |source| convert_csv(source) } unless [:csv_row_sep, :csv_col_sep, :csv_quote_char, :csv_value_proc].all?{ |csv_option| option(csv_option).blank? }
+          end
           files
         end
 
@@ -52,6 +57,25 @@ module Itrp
             end
           end
           files
+        end
+
+        # Convert the CSV files using the CSV options
+        def convert_csv(original_csv)
+          csv_options = {}
+          csv_options[:col_sep] = option(:csv_col_sep) unless option(:csv_col_sep).blank?
+          csv_options[:row_sep] = option(:csv_row_sep) unless option(:csv_row_sep).blank?
+          csv_options[:quote_char] = option(:csv_quote_char) unless option(:csv_quote_char).blank?
+          value_converter = option(:csv_value_proc)
+
+          converted_csv = "#{original_csv}.converting"
+          CSV.open(converted_csv, 'wb', csv_options) do |csv|
+            CSV.foreach(original_csv) do |row|
+              row = row.map{ |value| value.blank? ? '' : value_converter.call(value) } if value_converter
+              csv << row
+            end
+          end
+          FileUtils.remove(original_csv)
+          FileUtils.move(converted_csv, original_csv)
         end
 
         def local_transfer(files)
@@ -81,10 +105,10 @@ module Itrp
         # copy a file from the local disk to a remote FTP server
         # it is possible to use a path in the remote file, e.g. 'dir1/dir2/remote_file.txt'
         def ftp_copy(ftp, local_file, remote_file)
-          in_ftp_dir(ftp, File.dirname(remote_file)) do |ftp|
+          in_ftp_dir(ftp, File.dirname(remote_file)) do |_ftp|
             basename = File.basename(remote_file)
-            ftp.putbinaryfile(local_file, "#{basename}.in_progress")
-            ftp.rename("#{basename}.in_progress", basename)
+            _ftp.putbinaryfile(local_file, "#{basename}.in_progress")
+            _ftp.rename("#{basename}.in_progress", basename)
           end
         end
 

@@ -141,7 +141,11 @@ All options available:
 * _imap_mailbox_:   The mailbox to monitor for ITRP export mails (default: `INBOX`)
 * _imap_archive_:   The archive mailbox to store the processed ITRP export mails (default: `[Gmail]/All Mail`)
 * _on_exception_:   A Proc that takes an exception and the mail as an argument: `Proc.new{ |ex, mail| ... }`.
-All exceptions will also be logged as errors in the logfile.
+                    All exceptions will also be logged as errors in the logfile.
+* _csv_row_sep_:    Set the CSV row separator (default: windows/unix newline)
+* _csv_col_sep_:    Set the CSV column separator (default: ',' [comma])
+* _csv_quote_char_: Set the CSV quote character, at most 1 character (default: '"' [double quote])
+* _csv_value_proc_: Provide a procedure to change values before adding them to the CSV.
 
 
 Start the Export Monitor
@@ -294,3 +298,18 @@ is removed.
 
 Another way to prevent issues with partially copied files is to try to obtain a write lock on the file
 before processing the export file. The OS will return an error when the file is not completely copied.
+
+#### CSV not fully supported?
+
+Some systems, like [SAP BI](http://scn.sap.com/thread/3200938), cannot handle well-defined CSV files.
+As a workaround the Export Monitor can rewrite the CSV files in a different format. To do so, take a look
+at the [configuration](#configuration).
+
+The most common issue is that new-lines within a value are not handled correctly when the new-line is also used
+as a row separator. One way to deal with that is to replace the new-lines in the values with a different value:
+
+```
+Itrp::Export::Monitor.configure do |export|
+  export.csv_value_proc = Proc.new{ |value| value.gsub(/\r?\n/, ' ') }
+end
+```

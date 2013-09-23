@@ -15,6 +15,10 @@ module Itrp
           [:root, :ids, :imap_user_name, :imap_password].each do |required_option|
             raise ::Itrp::Exception.new("Missing required configuration option #{required_option}") if option(required_option).blank?
           end
+          [:sub_dirs, :csv_row_sep, :csv_col_sep, :csv_quote_char, :csv_value_proc].each do |unzip_dependent_option|
+            raise ::Itrp::Exception.new("Configuration option #{unzip_dependent_option} is only available when unzip is true") unless option(unzip_dependent_option).blank?
+          end unless @options[:unzip]
+          raise ::Itrp::Exception.new("Configuration option csv_quote_char must be 1 character long") unless option(:csv_quote_char).blank? || option(:csv_quote_char).length == 1
           @logger = @options[:logger]
         end
 

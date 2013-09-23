@@ -24,7 +24,7 @@ describe Itrp::Export::Monitor::Service do
 
   context 'run' do
     it 'should use the singleton export monitor for both run and process' do
-      Itrp::Export::Monitor::Service.any_instance.stub(:option){ 'value' }
+      Itrp::Export::Monitor::Service.any_instance.stub(:option){ 'v' }
       Itrp::Export::Monitor::Service.any_instance.stub(:generate_clacks_config){ 'clacks_config_file.rb' }
       expect(Clacks::Command).to receive(:new).with(['-c', 'clacks_config_file.rb', '-D']) { double(exec: 'started') }
 
@@ -54,6 +54,19 @@ describe Itrp::Export::Monitor::Service do
       Itrp::Export::Monitor.configuration.logger = logger
       monitor = Itrp::Export::Monitor::Service.new
       monitor.instance_variable_get(:@logger).should == logger
+    end
+
+    [:csv_row_sep, :csv_col_sep, :csv_quote_char, :csv_value_proc].each do |unzip_dependent_option|
+      it "should raise an exception is the option #{unzip_dependent_option} is set and unzip is false" do
+        Itrp::Export::Monitor.configuration.unzip = false
+        Itrp::Export::Monitor.configuration.send(:"#{unzip_dependent_option}=", unzip_dependent_option == :csv_value_proc ? Proc.new{|x| x} : 'not empty')
+        expect{ Itrp::Export::Monitor::Service.new }.to raise_error(::Itrp::Exception, "Configuration option #{unzip_dependent_option} is only available when unzip is true")
+      end
+    end
+
+    it 'should check the length of the csv_quote_char option' do
+      Itrp::Export::Monitor.configuration.csv_quote_char = '7 chars'
+      expect{ Itrp::Export::Monitor::Service.new }.to raise_error(::Itrp::Exception, 'Configuration option csv_quote_char must be 1 character long')
     end
   end
 

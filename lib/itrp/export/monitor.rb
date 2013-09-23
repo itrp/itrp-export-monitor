@@ -81,6 +81,11 @@ module Itrp
         has :imap_archive, classes: String, default: '[Gmail]/All Mail'
 
         has :on_exception, classes: Proc
+
+        has :csv_row_sep, classes: String
+        has :csv_col_sep, classes: String
+        has :csv_quote_char, classes: String
+        has :csv_value_proc, classes: Proc
       end
 
       class << self
