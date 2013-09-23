@@ -80,9 +80,11 @@ BASE_DIR = "/usr/local/itrp_exports/export_monitor_777"
 FileUtils.mkpath "#{BASE_DIR}/log"
 
 Itrp::Export::Monitor.configure do |export|
-  export.root = BASE_DIR
-  export.logger = Logger.new("#{BASE_DIR}/log/export_monitor.777.log")
-  export.ids =    [777]
+  export.root =       BASE_DIR
+  export.logger =     Logger.new("#{BASE_DIR}/log/export_monitor.777.log")
+  export.ids =        [777]
+  export.unzip =      true
+  export.sub_dirs =   false
 
   export.to = '/tmp/exports'
   # export.to_ftp =        'ftp.mycompany.com'
@@ -124,7 +126,8 @@ All options available:
 * _daemonize_:      Set to `true` to run in daemon mode; not available on Windows (default: `false`)
 * _root_:           **required** The root directory to store Export Monitor logs, pids and downloads
 * _id/ids_:         **required** The id(s) of the Scheduled Exports to monitor
-* _unzip_:          Unzip the CSV files, default: `false`.
+* _unzip_:          Unzip the CSV files, default: `true`.
+* _sub_dirs_:       Place each CSV file in a different subdirectory based on the export type, default : `false`.
 * _to_:             Directory to store export files
 * _to_ftp_:         The address of the FTP server to sent the completed downloads to, e.g. 'ftp.mycompany.com'
 * _to_ftp_dir_:     The subdirectory on the FTP server (default: '.'), e.g. 'my/downloads'

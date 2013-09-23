@@ -6,6 +6,7 @@ describe Itrp::Export::Monitor::Exchange do
     @options = {
       root: "#{@spec_dir}/tmp/exports",
       to: "#{@spec_dir}/tmp/copy_to",
+      unzip: true,
 
       to_ftp:        'ftp://ftp.example.com:888',
       to_ftp_dir:    '.',
@@ -26,8 +27,17 @@ describe Itrp::Export::Monitor::Exchange do
 
   context 'unzip' do
     before(:each) do
-      @options[:unzip] = true
       @exchange = exchange('20130923-072313-export.zip')
+    end
+
+    it 'should not unzip when setting the option to false' do
+      @exchange.options[:unzip] = false
+      @exchange.options[:to_ftp] = nil
+      expect_log("Copied 1 file(s) from '#{@exchange.fullpath}' to '#{@options[:to]}'")
+
+      @exchange.transfer
+
+      File.exists?("#{@options[:to]}/20130923-072313-export.zip").should == true
     end
 
     it 'should unzip to local disk' do
@@ -54,6 +64,46 @@ describe Itrp::Export::Monitor::Exchange do
       expect(Net::FTP).to receive(:open).with('ftp://ftp.example.com:888', 'ftp user', 'ftp password').and_yield(ftp)
 
       @exchange.transfer
+    end
+
+    context 'sub_dirs' do
+      before(:each) do
+        @exchange.options[:sub_dirs] = true
+      end
+
+      it 'should unzip and use sub directories on local disk' do
+        @exchange.options[:to_ftp] = nil
+        expect_log("Copied 4 file(s) from '#{@exchange.fullpath}' to '#{@options[:to]}'")
+
+        @exchange.transfer
+
+        File.read("#{@options[:to]}/calendars/5-20130923-072312-calendars.csv").should include( %(30,,,24x7 except Sunday 5:00am until Noon,mon,00:00,24:00))
+        File.read("#{@options[:to]}/organizations/5-20130923-072312-organizations.csv").should include( %(5,,,0,Widget Data Center,1,Widget Data Center,NA,,,"Widget Data Center provides IT services to the subsidiaries of Widget International, Corp."))
+        File.read("#{@options[:to]}/organizations_contact_details/5-20130923-072312-organizations_contact_details.csv").should include( %(International Business Machines Corporation (IBM),,,,street,590 Madison Avenue,New York,NY,10022,US,0))
+        File.read("#{@options[:to]}/sites/5-20130923-072312-sites.csv").should include( %(14,,,0,IT Training Facility,"4465 San Felipe Street, Suite 1508",Houston,TX,77027,US,Central Time (US & Canada),))
+      end
+
+      it 'should unzip and use sub directories for FTP' do
+        @exchange.options[:to] = nil
+        expect_log("Copied 4 file(s) from '#{@exchange.fullpath}' to '#{@options[:to_ftp]}/.'")
+
+        ftp = double('Net::FTP')
+        expect(ftp).to receive(:pwd).with().and_return('/root').exactly(4).times
+        [%w(calendars                     5-20130923-072312-calendars.csv),
+         %w(organizations                 5-20130923-072312-organizations.csv),
+         %w(organizations_contact_details 5-20130923-072312-organizations_contact_details.csv),
+         %w(sites                         5-20130923-072312-sites.csv)].each do |sub_dir, csv|
+          expect(ftp).to receive(:mkdir).with(sub_dir)
+          expect(ftp).to receive(:chdir).with(sub_dir)
+          expect(ftp).to receive(:putbinaryfile).with("#{@exchange.fullpath[0..-5]}/#{csv}", "#{csv}.in_progress")
+          expect(ftp).to receive(:rename).with("#{csv}.in_progress", csv)
+        end
+        expect(ftp).to receive(:chdir).with('/root').exactly(4).times
+
+        expect(Net::FTP).to receive(:open).with('ftp://ftp.example.com:888', 'ftp user', 'ftp password').and_yield(ftp)
+
+        @exchange.transfer
+      end
     end
   end
 

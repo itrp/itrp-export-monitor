@@ -13,10 +13,11 @@ BASE_DIR = "#{Dir.pwd}/#{monitor_name.gsub('.', '_')}"
 FileUtils.mkpath "\#{BASE_DIR}/log"
 
 Itrp::Export::Monitor.configure do |export|
-  export.root =    BASE_DIR
-  export.logger =  Logger.new("\#{BASE_DIR}/log/#{monitor_name}.log")
-  export.ids =     [#{args.export_id}]
-  # export.unzip = true
+  export.root =       BASE_DIR
+  export.logger =     Logger.new("\#{BASE_DIR}/log/#{monitor_name}.log")
+  export.ids =        [#{args.export_id}]
+  export.unzip =      true
+  export.sub_dirs =   false
 
   export.to = '/tmp/exports'
   # export.to_ftp =        'ftp.mycompany.com'

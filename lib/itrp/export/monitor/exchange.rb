@@ -31,7 +31,11 @@ module Itrp
 
         # return an hash with files that need to be transferred {<local file name>: <remote file path>}
         def transfer_files
+          # unzip if needed
           files = option(:unzip) && @fullpath =~ /\.zip$/ ? unzip : {@fullpath => @basename}
+          # prepend the export type as a subdirectory in the target path
+          files.each_value{ |target| target.insert(0, "#{target[/.*-(.*)\.csv$/, 1]}/")} if option(:sub_dirs)
+          files
         end
 
         # unzip all files to tmp directory
