@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'open-uri'
-require 'net/ftp'
 
 module Itrp
   module Export
@@ -86,34 +85,15 @@ EOF
 
         def store_export(mail)
           # download export file to the downloads directory
-          local_filename = download_export(mail)
-          # copy the file to the :to directory
-          copy_export(local_filename) if option(:to)
-          # ftp the file
-          ftp_export(local_filename) if option(:to_ftp)
+          export_file_name = download_export(mail)
+          # and tranfer the files
+          Itrp::Export::Monitor::Exchange.new(export_file_name, @options).transfer
         end
 
         def download_export(mail)
           local_filename = "#{dir(:downloads)}/#{mail.filename}"
           File.open(local_filename, 'wb') { |f| f.write(open(mail.download_uri).read) }
           local_filename
-        end
-
-        def copy_export(local_filename)
-          FileUtils.mkpath(option(:to))
-          to_filename = "#{option(:to)}/#{File.basename(local_filename)}"
-          FileUtils.copy(local_filename, "#{to_filename}.in_progress")
-          FileUtils.move("#{to_filename}.in_progress", to_filename)
-          @logger.info { "Copied export '#{local_filename}' to '#{to_filename}'" }
-        end
-
-        def ftp_export(local_filename)
-          remote_filename = File.basename(local_filename)
-          Net::FTP.open(option(:to_ftp), option(:ftp_user_name), option(:ftp_password)) do |ftp|
-            ftp.putbinaryfile(local_filename, "#{remote_filename}.in_progress")
-            ftp.rename("#{remote_filename}.in_progress", remote_filename)
-          end
-          @logger.info { "FTP export '#{local_filename}' to '#{option(:to_ftp)}/#{remote_filename}'" }
         end
 
         def dir(subdir)

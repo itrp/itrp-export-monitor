@@ -159,38 +159,17 @@ describe Itrp::Export::Monitor::Service do
       end
 
       it 'should download the export file to disk' do
-        expect(@service).to receive(:copy_export)
-        expect(@service).to receive(:ftp_export)
+        Itrp::Export::Monitor::Exchange.any_instance.stub(:new){ double(transfer: 'transferring') }
         @service.process(@export_mail)
 
         File.read(@local_filename).should == 'exported content'
       end
 
-      it 'should copy the export file to another location' do
-        expect(@service).to receive(:ftp_export)
-        expect_log("Processing ITRP Export mail:\n  Subject: Export finished - Full ad hoc export -- ITRP example\n  Export ID: 2\n  Token: #{@export_token}\n  URI: #{@export_uri}")
-        expect_log("Copied export '#{@local_filename}' to '#{Itrp::Export::Monitor.configuration.to}/20130911-195545-affected_slas.csv'")
-
+      it 'should call the exchange handler' do
+        expect(Itrp::Export::Monitor::Exchange).to receive(:new).with(@local_filename, @service.instance_variable_get(:@options)) { double(transfer: 'transferring') }
         @service.process(@export_mail)
-
-        File.read(@local_filename).should == 'exported content'
-        File.read("#{Itrp::Export::Monitor.configuration.to}/20130911-195545-affected_slas.csv").should == 'exported content'
       end
 
-      it 'should FTP the export file' do
-        expect(@service).to receive(:copy_export)
-        expect_log("Processing ITRP Export mail:\n  Subject: Export finished - Full ad hoc export -- ITRP example\n  Export ID: 2\n  Token: #{@export_token}\n  URI: #{@export_uri}")
-        expect_log("FTP export '#{@local_filename}' to '#{Itrp::Export::Monitor.configuration.to_ftp}/20130911-195545-affected_slas.csv'")
-
-        ftp = double('Net::FTP')
-        expect(ftp).to receive(:putbinaryfile).with(@local_filename, '20130911-195545-affected_slas.csv.in_progress')
-        expect(ftp).to receive(:rename).with('20130911-195545-affected_slas.csv.in_progress', '20130911-195545-affected_slas.csv')
-        expect(Net::FTP).to receive(:open).with('ftp://ftp.example.com:888', 'ftp user', 'ftp password').and_yield(ftp)
-
-        @service.process(@export_mail)
-
-        File.read(@local_filename).should == 'exported content'
-      end
     end
 
   end

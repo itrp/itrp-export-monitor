@@ -19,6 +19,7 @@ Itrp::Export::Monitor.configure do |export|
 
   export.to = '/tmp/exports'
   # export.to_ftp =        'ftp.mycompany.com'
+  # export.to_ftp_dir =    'my/exports'
   # export.ftp_user_name = 'user'
   # export.ftp_password =  'secret'
 

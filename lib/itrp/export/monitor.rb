@@ -8,6 +8,7 @@ require 'clacks'
 require 'itrp/export/monitor/service'
 require 'itrp/export/monitor/version'
 require 'itrp/export/monitor/mail'
+require 'itrp/export/monitor/exchange'
 
 require 'active_support/core_ext/module/aliasing.rb'
 require 'active_support/core_ext/object/blank'
@@ -39,6 +40,7 @@ module Itrp
     #  - id/ids:         *required* The id(s) of the scheduled exports to monitor
     #  - to:             Location to store export files (default = <root>/ready)
     #  - to_ftp:         The address of the FTP server to sent the completed downloads to
+    #  - to_ftp_dir:     The subdirectory on the FTP server (default = '.')
     #  - ftp_user_name:  The user name to access the FTP server
     #  - ftp_password:   The password to access the FTP server
     #  - imap_address:   The address of the IMAP mail server (default: 'imap.googlemail.com')
@@ -62,6 +64,7 @@ module Itrp
         has :to, classes: String
 
         has :to_ftp, classes: String
+        has :to_ftp_dir, classes: String, default: '.'
         has :ftp_user_name, classes: String
         has :ftp_password, classes: String
 

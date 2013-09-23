@@ -86,6 +86,7 @@ Itrp::Export::Monitor.configure do |export|
 
   export.to = '/tmp/exports'
   # export.to_ftp =        'ftp.mycompany.com'
+  # export.to_ftp_dir =    'my/exports'
   # export.ftp_user_name = 'user'
   # export.ftp_password =  'secret'
 
@@ -124,7 +125,8 @@ All options available:
 * _root_:           **required** The root directory to store Export Monitor logs, pids and downloads
 * _id/ids_:         **required** The id(s) of the Scheduled Exports to monitor
 * _to_:             Directory to store export files
-* _to_ftp_:         The address of the FTP server to sent the completed downloads to (e.g. ftp.mycompany.com)
+* _to_ftp_:         The address of the FTP server to sent the completed downloads to, e.g. 'ftp.mycompany.com'
+* _to_ftp_dir_:     The subdirectory on the FTP server (default: '.'), e.g. 'my/downloads'
 * _ftp_user_name_:  The user name to access the FTP server
 * _ftp_password_:   The password to access the FTP server
 * _imap_address_:   **required** The address of the IMAP mail server (default: `imap.googlemail.com`)
@@ -236,7 +238,13 @@ Other considerations
 
 #### Setup a mailbox
 
-!!!!
+It is best to create a separate user in ITRP with a corresponding mailbox for each Export Monitor.
+
+For example: if the Export Monitor will monitor the Weekly Full People, you could create a
+[GMail](http://mail.google.com) for *people.monitor.mycompany@gmail.com*. Then create a new
+[ITRP User](http://developer.itrp.com/v1/general/getting_started/) using that email address.
+
+That's it. Now you are ready to [generate an Export Monitor](#generate-an-export-monitor).
 
 #### Not a dedicated mailbox?
 
