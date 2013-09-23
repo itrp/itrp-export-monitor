@@ -24,14 +24,47 @@ describe Itrp::Export::Monitor::Exchange do
     Itrp::Export::Monitor::Exchange.new(export_file, options)
   end
 
+  context 'unzip' do
+    before(:each) do
+      @options[:unzip] = true
+      @exchange = exchange('20130923-072313-export.zip')
+    end
+
+    it 'should unzip to local disk' do
+      @exchange.options[:to_ftp] = nil
+      expect_log("Copied 4 file(s) from '#{@exchange.fullpath}' to '#{@options[:to]}'")
+
+      @exchange.transfer
+
+      File.read("#{@options[:to]}/5-20130923-072312-calendars.csv").should include( %(30,,,24x7 except Sunday 5:00am until Noon,mon,00:00,24:00))
+      File.read("#{@options[:to]}/5-20130923-072312-organizations.csv").should include( %(5,,,0,Widget Data Center,1,Widget Data Center,NA,,,"Widget Data Center provides IT services to the subsidiaries of Widget International, Corp."))
+      File.read("#{@options[:to]}/5-20130923-072312-organizations_contact_details.csv").should include( %(International Business Machines Corporation (IBM),,,,street,590 Madison Avenue,New York,NY,10022,US,0))
+      File.read("#{@options[:to]}/5-20130923-072312-sites.csv").should include( %(14,,,0,IT Training Facility,"4465 San Felipe Street, Suite 1508",Houston,TX,77027,US,Central Time (US & Canada),))
+    end
+
+    it 'should unzip to FTP' do
+      @exchange.options[:to] = nil
+      expect_log("Copied 4 file(s) from '#{@exchange.fullpath}' to '#{@options[:to_ftp]}/.'")
+
+      ftp = double('Net::FTP')
+      ['5-20130923-072312-calendars.csv', '5-20130923-072312-organizations.csv', '5-20130923-072312-organizations_contact_details.csv', '5-20130923-072312-sites.csv'].each do |csv|
+        expect(ftp).to receive(:putbinaryfile).with("#{@exchange.fullpath[0..-5]}/#{csv}", "#{csv}.in_progress")
+        expect(ftp).to receive(:rename).with("#{csv}.in_progress", csv)
+      end
+      expect(Net::FTP).to receive(:open).with('ftp://ftp.example.com:888', 'ftp user', 'ftp password').and_yield(ftp)
+
+      @exchange.transfer
+    end
+  end
+
   context 'copy' do
     before(:each) do
+      @options[:to_ftp] = nil
       @exchange = exchange()
-      @exchange.options[:to_ftp] = nil
     end
 
     it 'should copy the export file to another location' do
-      expect_log("Copied export '#{@exchange.fullpath}' to '#{@options[:to]}/dummy.csv'")
+      expect_log("Copied 1 file(s) from '#{@exchange.fullpath}' to '#{@options[:to]}'")
 
       @exchange.transfer
 
@@ -41,12 +74,12 @@ describe Itrp::Export::Monitor::Exchange do
 
   context 'ftp' do
     before(:each) do
+      @options[:to] = nil
       @exchange = exchange()
-      @exchange.options[:to] = nil
     end
 
     it 'should FTP the export file' do
-      expect_log("FTP export '#{@exchange.fullpath}' to '#{@options[:to_ftp]}/./dummy.csv'")
+      expect_log("Copied 1 file(s) from '#{@exchange.fullpath}' to '#{@options[:to_ftp]}/.'")
 
       ftp = double('Net::FTP')
       expect(ftp).to receive(:putbinaryfile).with(@exchange.fullpath, 'dummy.csv.in_progress')
@@ -59,7 +92,7 @@ describe Itrp::Export::Monitor::Exchange do
     it 'should use the to_ftp_dir option' do
       @exchange.options[:to_ftp_dir] = 'dir1/dir2'
 
-      expect_log("FTP export '#{@exchange.fullpath}' to '#{@options[:to_ftp]}/dir1/dir2/dummy.csv'")
+      expect_log("Copied 1 file(s) from '#{@exchange.fullpath}' to '#{@options[:to_ftp]}/dir1/dir2'")
 
       ftp = double('FTP')
       expect(ftp).to receive(:pwd).once.with().and_return('/root/dir')

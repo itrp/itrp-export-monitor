@@ -61,6 +61,8 @@ module Itrp
         has :root, classes: String
         has :id, classes: Fixnum
         has :ids, classes: Array
+        has :unzip, classes: [TrueClass, FalseClass], default: false
+
         has :to, classes: String
 
         has :to_ftp, classes: String

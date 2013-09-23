@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'gem_config'
   spec.add_runtime_dependency 'itrp-client'
   spec.add_runtime_dependency 'active_support'
+  spec.add_runtime_dependency 'rubyzip'
   spec.add_runtime_dependency 'clacks', '>= 0.4.2'
 
   spec.add_development_dependency 'bundler', '~> 1.3'

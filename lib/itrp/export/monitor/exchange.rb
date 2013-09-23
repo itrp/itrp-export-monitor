@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'net/ftp'
+require 'zip'
 
 module Itrp
   module Export
@@ -17,10 +18,9 @@ module Itrp
         end
 
         def transfer
-          # copy the file to the :to directory
-          copy_export if option(:to)
-          # ftp the file
-          ftp_export if option(:to_ftp)
+          files = transfer_files
+          local_transfer(files) unless option(:to).blank?
+          ftp_transfer(files) unless option(:to_ftp).blank?
         end
 
         private
@@ -29,25 +29,49 @@ module Itrp
           @options[key]
         end
 
-        def copy_export
-          FileUtils.mkpath(option(:to))
-          to_filename = "#{option(:to)}/#{@basename}"
-          FileUtils.copy(@fullpath, "#{to_filename}.in_progress")
-          FileUtils.move("#{to_filename}.in_progress", to_filename)
-          @logger.info { "Copied export '#{@fullpath}' to '#{to_filename}'" }
+        # return an hash with files that need to be transferred {<local file name>: <remote file path>}
+        def transfer_files
+          files = option(:unzip) && @fullpath =~ /\.zip$/ ? unzip : {@fullpath => @basename}
         end
 
-        def ftp_export
-          Net::FTP.open(option(:to_ftp), option(:ftp_user_name), option(:ftp_password)) do |ftp|
-            ftp_copy(ftp, @fullpath, "#{option(:to_ftp_dir)}/#{@basename}")
+        # unzip all files to tmp directory
+        def unzip
+          files = {}
+          unzip_dir = @fullpath[0..-5]
+          FileUtils.mkpath(unzip_dir)
+          Zip::File.open(@fullpath) do |zipfile|
+            zipfile.each do |entry|
+              next unless entry.file?
+              full_source_path = "#{unzip_dir}/#{entry.name}"
+              entry.extract(full_source_path)
+              files[full_source_path] = entry.name
+            end
           end
-          @logger.info { "FTP export '#{@fullpath}' to '#{option(:to_ftp)}/#{option(:to_ftp_dir)}/#{@basename}'" }
+          files
         end
 
-        def dir(subdir)
-          directory = File.expand_path(subdir.to_s, option(:root))
-          FileUtils.mkpath(directory)
-          directory
+        def local_transfer(files)
+          files.each do |full_source_path, relative_target_path|
+            full_target_path = "#{option(:to)}/#{relative_target_path}"
+            local_copy(full_source_path, full_target_path)
+          end
+          @logger.info { "Copied #{files.size} file(s) from '#{@fullpath}' to '#{option(:to)}'" }
+        end
+
+        # copy a local file and make sure the directories are created
+        def local_copy(source, target)
+          FileUtils.mkpath(File.dirname(target))
+          FileUtils.copy(source, "#{target}.in_progress")
+          FileUtils.move("#{target}.in_progress", target)
+        end
+
+        def ftp_transfer(files)
+          Net::FTP.open(option(:to_ftp), option(:ftp_user_name), option(:ftp_password)) do |ftp|
+            files.each do |full_source_path, relative_target_path|
+              ftp_copy(ftp, full_source_path, "#{option(:to_ftp_dir)}/#{relative_target_path}")
+            end
+          end
+          @logger.info { "Copied #{files.size} file(s) from '#{@fullpath}' to '#{option(:to_ftp)}/#{option(:to_ftp_dir)}'" }
         end
 
         # copy a file from the local disk to a remote FTP server
