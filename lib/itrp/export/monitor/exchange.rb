@@ -52,7 +52,7 @@ module Itrp
             zipfile.each do |entry|
               next unless entry.file?
               full_source_path = "#{unzip_dir}/#{entry.name}"
-              entry.extract(full_source_path)
+              entry.extract(full_source_path) { true } # true for overwrite
               files[full_source_path] = entry.name
             end
           end

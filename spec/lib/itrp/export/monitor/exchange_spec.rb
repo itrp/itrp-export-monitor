@@ -43,6 +43,7 @@ describe Itrp::Export::Monitor::Exchange do
     it 'should unzip to local disk' do
       @exchange.options[:to_ftp] = nil
       expect_log("Copied 4 file(s) from '#{@exchange.fullpath}' to '#{@options[:to]}'")
+      expect_log("Copied 4 file(s) from '#{@exchange.fullpath}' to '#{@options[:to]}'")
 
       @exchange.transfer
 
@@ -50,6 +51,8 @@ describe Itrp::Export::Monitor::Exchange do
       File.read("#{@options[:to]}/5-20130923-072312-organizations.csv").should include( %(27,,,0,Microsoft Corporation,0,,,,,"Global product licensing sales contact for Widget International, Corp.: Brian Waymore\nEmail: brian.waymore@microsoft.com"\n))
       File.read("#{@options[:to]}/5-20130923-072312-organizations_contact_details.csv").should include( %(International Business Machines Corporation (IBM),,,,street,590 Madison Avenue,New York,NY,10022,US,0\n))
       File.read("#{@options[:to]}/5-20130923-072312-sites.csv").should include( %(14,,,0,IT Training Facility,"4465 San Felipe Street, Suite 1508",Houston,TX,77027,US,Central Time (US & Canada),\n))
+
+      @exchange.transfer # re-transfer without exceptions (overwrite file)
     end
 
     it 'should unzip to FTP' do
