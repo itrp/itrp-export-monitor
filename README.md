@@ -242,7 +242,7 @@ All export files that are downloaded are kept in the `<export.root>/downloads` d
 These files are not deleted automatically, so you might want to add a job to cleanup this
 directory every month/year depending on your setup.
 
-#### No a real service?
+#### Not a real service?
 
 The `exit_when_idle` option may be used to stop the Export Monitor when there are no new
 export mails coming in for a couple of minutes. This may be useful in case you want to
