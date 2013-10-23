@@ -124,28 +124,30 @@ All options available:
 
 * _logger_:         The Ruby Logger instance, default: `Logger.new(STDOUT)`
 * _daemonize_:      Set to `true` to run in daemon mode; not available on Windows (default: `false`)
+* _exit_when_idle_: Number of minutes after which the service stops when no Export mails are found (default: `-1` no exit)
 * _root_:           **required** The root directory to store Export Monitor logs, pids and downloads
-* _id/ids_:         **required** The id(s) of the Scheduled Exports to monitor
+* _id/ids_:         **required** The id(s) of the Scheduled Exports to monitor, e.g. `[777]`
 * _unzip_:          Unzip the CSV files, default: `true`.
-* _sub_dirs_:       Place each CSV file in a different subdirectory based on the export type, default : `false`.
-* _to_:             Directory to store export files
-* _to_ftp_:         The address of the FTP server to sent the completed downloads to, e.g. 'ftp.mycompany.com'
-* _to_ftp_dir_:     The subdirectory on the FTP server (default: '.'), e.g. 'my/downloads'
+* _sub_dirs_:       Place each CSV file in a different subdirectory based on the export type (default: `false`)
+* _to_:             Directory to store export files on local disk, e.g. `'/tmp/people_export'`
+* _to_ftp_:         The address of the FTP server to sent the completed downloads to, e.g. `'ftp.mycompany.com'`
+* _to_ftp_dir_:     The subdirectory on the FTP server, e.g. `'my/downloads'` (default: `'.'`)
 * _ftp_user_name_:  The user name to access the FTP server
 * _ftp_password_:   The password to access the FTP server
-* _imap_address_:   **required** The address of the IMAP mail server (default: `imap.googlemail.com`)
+* _imap_address_:   **required** The address of the IMAP mail server (default: `'imap.googlemail.com'`)
 * _imap_port_:      The port of the IMAP mail server (default: `993`)
 * _imap_ssl_:       Set to +false+ to disabled SSL (default: `true`)
 * _imap_user_name_: **required** The user name to access the IMAP server
 * _imap_password_:  **required** The password to access the IMAP server
-* _imap_mailbox_:   The mailbox to monitor for ITRP export mails (default: `INBOX`)
-* _imap_archive_:   The archive mailbox to store the processed ITRP export mails (default: `[Gmail]/All Mail`)
+* _imap_mailbox_:   The mailbox to monitor for ITRP export mails (default: `'INBOX'`)
+* _imap_archive_:   The archive mailbox to store the processed ITRP export mails (default: `'[Gmail]/All Mail'`)
 * _on_exception_:   A Proc that takes an exception and the mail as an argument: `Proc.new{ |ex, mail| ... }`.
-                    All exceptions will also be logged as errors in the logfile.
-* _csv_row_sep_:    Set the CSV row separator (default: windows/unix newline)
-* _csv_col_sep_:    Set the CSV column separator (default: ',' [comma])
-* _csv_quote_char_: Set the CSV quote character, at most 1 character (default: '"' [double quote])
-* _csv_value_proc_: Provide a procedure to change values before adding them to the CSV.
+  All exceptions will also be logged as errors in the logfile.
+* _csv_row_sep_:    Set the CSV row separator (default: `:auto`, i.e. windows/unix newline)
+* _csv_col_sep_:    Set the CSV column separator (default: `','`)
+* _csv_quote_char_: Set the CSV quote character, at most 1 character (default: `'"'`)
+* _csv_value_proc_: Provide a procedure to change values before adding them to the CSV, e.g.
+  `Proc.new{ |value| value.gsub(/\r?\n/, ' ')`
 
 
 Start the Export Monitor
@@ -240,6 +242,11 @@ All export files that are downloaded are kept in the `<export.root>/downloads` d
 These files are not deleted automatically, so you might want to add a job to cleanup this
 directory every month/year depending on your setup.
 
+#### No a real service?
+
+The `exit_when_idle` option may be used to stop the Export Monitor when there are no new
+export mails coming in for a couple of minutes. This may be useful in case you want to
+fire up the Export Monitor at a scheduled time using the cron-tab or Windows Task Scheduler.
 
 Other considerations
 --------------------

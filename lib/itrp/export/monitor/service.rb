@@ -6,7 +6,6 @@ module Itrp
     module Monitor
 
       class Service
-
         def initialize
           @failed_exports = Set.new
           @missing_export_ids = Set.new
@@ -20,6 +19,7 @@ module Itrp
           end unless @options[:unzip]
           raise ::Itrp::Exception.new("Configuration option csv_quote_char must be 1 character long") unless option(:csv_quote_char).blank? || option(:csv_quote_char).length == 1
           @logger = @options[:logger]
+          create_exit_when_idle_timer
         end
 
         # Retrieve an option
@@ -33,6 +33,7 @@ module Itrp
 
           if option(:ids).include?(mail.export_id)
             begin
+              kill_exit_when_idle_timer
               @logger.info { "Processing ITRP Export mail:\n  Subject: #{mail.original.subject}\n  Export ID: #{mail.export_id}\n  Token: #{mail.token}\n  URI: #{mail.download_uri}" }
               store_export(mail)
             rescue ::Exception => ex
@@ -40,6 +41,8 @@ module Itrp
               @logger.error { "Processing of mail '#{mail.original.subject}' failed: #{ex.message}\n  #{ex.backtrace.join("\n  ")}" }
               handle_exception(ex, mail)
               mail.ignore # leave mail in the mailbox
+            ensure
+              create_exit_when_idle_timer
             end
           else
             mail.ignore # leave mail in the mailbox
@@ -122,6 +125,28 @@ EOF
             end
           end
         end
+
+        def kill_exit_when_idle_timer
+          @exit_when_idle_timer.try(:kill)
+          @exit_when_idle_timer = nil
+        end
+
+        # reset timer to exit when the export monitor has been idle for a given nr of minutes
+        def create_exit_when_idle_timer
+          timeout_in_seconds = option(:exit_when_idle).to_i * 60
+          return unless timeout_in_seconds > 0
+          begin
+            kill_exit_when_idle_timer # make sure only 1 timer thread is running at a time
+            @exit_when_idle_timer = Thread.new do
+              sleep timeout_in_seconds
+              stop_signal = (Signal.list.keys & ['QUIT', 'INT']).first
+              Process.kill(stop_signal, Process.pid)
+            end
+          rescue ::Exception => ex
+            @logger.error { "Unable to schedule timer to exit when idle in #{timeout_in_seconds} seconds: #{ex.message}\n  #{ex.backtrace.join("\n  ")}" }
+          end
+        end
+
       end
     end
   end

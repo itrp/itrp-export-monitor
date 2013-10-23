@@ -58,6 +58,7 @@ module Itrp
         has :logger, classes: ::Logger, default: ::Logger.new(STDOUT)
 
         has :daemonize, classes: [TrueClass, FalseClass], default: false
+        has :exit_when_idle, classes: Fixnum, default: -1
         has :root, classes: String
         has :id, classes: Fixnum
         has :ids, classes: Array
@@ -99,7 +100,7 @@ module Itrp
           args = ['-c', clacks_config_filename]
           args << '-D' if @service.option(:daemonize)
           Clacks::Command.new(args).exec
-          # returns the singleton instance
+          # return the singleton instance
           @service
         end
 

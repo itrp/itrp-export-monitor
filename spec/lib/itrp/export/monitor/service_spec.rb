@@ -26,7 +26,8 @@ describe Itrp::Export::Monitor::Service do
     it 'should use the singleton export monitor for both run and process' do
       Itrp::Export::Monitor::Service.any_instance.stub(:option){ 'v' }
       Itrp::Export::Monitor::Service.any_instance.stub(:generate_clacks_config){ 'clacks_config_file.rb' }
-      expect(Clacks::Command).to receive(:new).with(['-c', 'clacks_config_file.rb', '-D']) { double(exec: 'started') }
+      command = double(exec: 'started')
+      expect(Clacks::Command).to receive(:new).with(['-c', 'clacks_config_file.rb', '-D']) { command }
 
       service = Itrp::Export::Monitor.run
 
@@ -68,6 +69,11 @@ describe Itrp::Export::Monitor::Service do
       Itrp::Export::Monitor.configuration.csv_quote_char = '7 chars'
       expect{ Itrp::Export::Monitor::Service.new }.to raise_error(::Itrp::Exception, 'Configuration option csv_quote_char must be 1 character long')
     end
+
+    it 'should reset the idle timer on initialize' do
+      Itrp::Export::Monitor::Service.any_instance.stub(:create_exit_when_idle_timer).and_raise('ok')
+      expect{ Itrp::Export::Monitor::Service.new }.to raise_error('ok')
+    end
   end
 
   it 'should define the option method' do
@@ -94,7 +100,12 @@ describe Itrp::Export::Monitor::Service do
 
       @service.process(@export_mail)
     end
-
+    
+    it 'should reset the idle timer when a mail is processed' do
+      expect(@service).to receive(:create_exit_when_idle_timer)
+      @service.process(@export_mail)
+    end
+    
     it 'should skip mails when an exception occurs' do
       expect(@export_mail).to receive(:skip_deletion).once
       expect_log("Processing ITRP Export mail:\n  Subject: Export finished - Full ad hoc export -- ITRP example\n  Export ID: 2\n  Token: #{@export_token}\n  URI: #{@export_uri}")
@@ -155,6 +166,11 @@ describe Itrp::Export::Monitor::Service do
       @service.process(@non_export_mail)
     end
 
+    it 'should not reset the idle timer when a non export mail is processed' do
+      expect(@service).not_to receive(:create_exit_when_idle_timer)
+      @service.process(@non_export_mail)
+    end
+
     it 'should skip non-monitored export ids' do
       Itrp::Export::Monitor.configuration.ids = [1,3]
       monitor = Itrp::Export::Monitor::Service.new
@@ -185,6 +201,40 @@ describe Itrp::Export::Monitor::Service do
 
     end
 
+  end
+
+  context 'exit_when_idle' do
+
+    it 'should not create an exit timer when the exit_when_idle option is -1' do
+      Itrp::Export::Monitor.configuration.exit_when_idle = -1
+      service = Itrp::Export::Monitor::Service.new
+      service.instance_variable_get(:@exit_when_idle_timer).should == nil
+    end
+
+    it 'should stop the clacks service when the timeout is reached' do
+      Itrp::Export::Monitor.configuration.exit_when_idle = 1
+
+      Itrp::Export::Monitor::Service.any_instance.stub(:sleep).with(60)
+      thread = double('thread')
+      expect(Thread).to receive(:new).and_yield.and_return(thread)
+      expect(Process).to receive(:pid){ 777 }
+      expect(Process).to receive(:kill).with((Signal.list.keys & ['QUIT', 'INT']).first, 777)
+
+      service = Itrp::Export::Monitor::Service.new
+      service.instance_variable_get(:@exit_when_idle_timer).should == thread
+    end
+
+    it 'should log an error when the timer could not be created' do
+      Itrp::Export::Monitor.configuration.exit_when_idle = 1
+
+      exception = Exception.new('oops!')
+      allow(exception).to receive(:backtrace){ %w(trace back) }
+      expect(Thread).to receive(:new).and_raise(exception)
+      # expect the error to be logged
+      expect_log("Unable to schedule timer to exit when idle in 60 seconds: oops!\n  trace\n  back", :error)
+
+      service = Itrp::Export::Monitor::Service.new
+    end
   end
 
   it 'should create a clacks config file' do
