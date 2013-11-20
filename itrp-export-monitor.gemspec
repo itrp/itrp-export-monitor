@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.email                 = %q{developers@itrp.com}
   spec.description           = %q{Monitor a mailbox and store Scheduled ITRP Exports to disk or FTP.}
   spec.summary               = %q{The itrp-export-monitor gem makes it easy to monitor a mailbox receiving Scheduled Exports from ITRP and to store the incoming export files on disk or forward it to an FTP server.}
-  spec.homepage              = 'http://help.itrp.com/help/import'
+  spec.homepage              = %q{https://github.com/itrp/itrp-export-monitor}
   spec.license               = 'MIT'
 
   spec.files = Dir.glob("lib/**/*") + %w(LICENSE.txt README.md Gemfile Gemfile.lock itrp-export-monitor.gemspec)
@@ -25,7 +25,8 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'itrp-client'
   spec.add_runtime_dependency 'active_support'
   spec.add_runtime_dependency 'rubyzip'
-  spec.add_runtime_dependency 'clacks', '>= 0.4.2'
+  spec.add_runtime_dependency 'clacks', '>= 1.0.0'
+  spec.add_dependency 'i18n'
 
   spec.add_development_dependency 'bundler', '~> 1.3'
   spec.add_development_dependency 'rake'
