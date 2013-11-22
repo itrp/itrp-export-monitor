@@ -248,6 +248,27 @@ The `exit_when_idle` option may be used to stop the Export Monitor when there ar
 export mails coming in for a couple of minutes. This may be useful in case you want to
 fire up the Export Monitor at a scheduled time using the cron-tab or Windows Task Scheduler.
 
+#### Cannot connect to IMAP server?
+
+In case the connection to the IMAP server fails, you may see the following in the log file:
+
+```
+A connection attempt failed because the connected party did not properly respond after a period of time,
+or established connection failed because connected host has failed to respond.
+```
+
+To test the connection and get some more details on what is going wrong, use *telnet* to connect directly
+to the IMAP server:
+
+```
+$ telnet imap.gmail.com 993
+Trying 74.125.136.109...
+Connected to gmail-imap.l.google.com.
+Escape character is '^]'.
+```
+
+If the connection fails, you will get a different results from the one listed above.
+
 Other considerations
 --------------------
 
