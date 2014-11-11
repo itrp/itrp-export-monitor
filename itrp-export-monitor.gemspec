@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
   spec.rdoc_options = ['--charset=UTF-8']
 
   spec.add_runtime_dependency 'gem_config'
-  spec.add_runtime_dependency 'itrp-client', '>= 1.0.6'
+  spec.add_runtime_dependency 'itrp-client', '>= 1.0.7'
   spec.add_runtime_dependency 'activesupport'
   spec.add_runtime_dependency 'rubyzip', '>= 1.1.0'
   spec.add_runtime_dependency 'clacks', '>= 1.0.7'
