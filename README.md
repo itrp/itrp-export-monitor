@@ -56,7 +56,7 @@ the Scheduled Export in ITRP at `https://<your domain>.itrp.com/exports`.
 
 The **email address** is the email address where the export file is sent to.
 This is the email address of the user defined in the *Run as* field.
-**We strongly recommend to [create a separate mailbox](setup-a-mailbox) for the export monitor.**
+**We strongly recommend to [create a separate mailbox](#setup-a-mailbox) for the export monitor.**
 
 The **password** is the password with which the IMAP server can be accessed for this email address.
 
