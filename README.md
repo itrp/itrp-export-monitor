@@ -141,6 +141,7 @@ All options available:
 * _imap_password_:  **required** The password to access the IMAP server
 * _imap_mailbox_:   The mailbox to monitor for ITRP export mails (default: `'INBOX'`)
 * _imap_archive_:   The archive mailbox to store the processed ITRP export mails (default: `'[Gmail]/All Mail'`)
+* _imap_search_:   The query used to search for emails from ITRP containing export data (default: `'FROM ITRP HEADER X-ITRP-ExportID ""'`)
 * _on_exception_:   A Proc that takes an exception and the mail as an argument: `Proc.new{ |ex, mail| ... }`.
   All exceptions will also be logged as errors in the logfile.
 * _csv_row_sep_:    Set the CSV row separator (default: `:auto`, i.e. windows/unix newline)

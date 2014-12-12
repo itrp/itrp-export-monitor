@@ -78,7 +78,7 @@ imap({
 find_options({
   mailbox:           '#{option(:imap_mailbox)}',
   archivebox:        '#{option(:imap_archive)}',
-  keys:              'FROM ITRP HEADER X-ITRP-ExportID ""',
+  keys:              '#{option(:imap_search)}',
   delete_after_find: true # Note that only the processed export mails will be deleted
 })
 

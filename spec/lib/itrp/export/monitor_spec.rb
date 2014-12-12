@@ -4,7 +4,33 @@ describe Itrp::Export::Monitor do
   it 'should define a default configuration' do
     conf = Itrp::Export::Monitor.configuration.current
 
-    conf.keys.sort.should == [:csv_col_sep, :csv_quote_char, :csv_row_sep, :csv_value_proc, :daemonize, :exit_when_idle, :ftp_password, :ftp_user_name, :id, :ids, :imap_address, :imap_archive, :imap_mailbox, :imap_password, :imap_port, :imap_ssl, :imap_user_name, :logger, :on_exception, :root, :sub_dirs, :to, :to_ftp, :to_ftp_dir, :unzip]
+    conf.keys.sort.should == [
+      :csv_col_sep,
+      :csv_quote_char,
+      :csv_row_sep,
+      :csv_value_proc,
+      :daemonize,
+      :exit_when_idle,
+      :ftp_password,
+      :ftp_user_name,
+      :id,
+      :ids,
+      :imap_address,
+      :imap_archive,
+      :imap_mailbox,
+      :imap_password,
+      :imap_port,
+      :imap_search,
+      :imap_ssl,
+      :imap_user_name,
+      :logger,
+      :on_exception,
+      :root,
+      :sub_dirs,
+      :to,
+      :to_ftp,
+      :to_ftp_dir,
+      :unzip]
 
     conf[:logger].class.should == ::Logger
     conf[:daemonize].should == false

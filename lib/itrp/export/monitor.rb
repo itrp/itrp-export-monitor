@@ -50,6 +50,7 @@ module Itrp
     #  - imap_password:  *required* The password to access the IMAP server
     #  - imap_mailbox:   The mailbox to monitor for ITRP export mails (default: 'INBOX')
     #  - imap_archive:   The archive mailbox to store the processed ITRP export mails (default: '[Gmail]/All Mail')
+    #  - imap_search:    The query used to search for emails from ITRP containing export data (default: `'FROM ITRP HEADER X-ITRP-ExportID ""'`)
     #  - on_exception:   A Proc that takes an exception and the mail as an argument: Proc.new{ |ex, mail| ... }
     module Monitor
       include GemConfig::Base
@@ -80,6 +81,7 @@ module Itrp
 
         has :imap_mailbox, classes: String, default: 'INBOX'
         has :imap_archive, classes: String, default: '[Gmail]/All Mail'
+        has :imap_search, classes: String, default: 'FROM ITRP HEADER X-ITRP-ExportID ""'
 
         has :on_exception, classes: Proc
 

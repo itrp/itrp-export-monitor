@@ -8,17 +8,18 @@ describe Itrp::Export::Monitor::Service do
       export.ids = [1, 2]
       export.to = "#{@spec_dir}/tmp/copy_to"
 
-      export.to_ftp =        'ftp://ftp.example.com:888'
-      export.ftp_user_name = 'ftp user'
-      export.ftp_password =  'ftp password'
+      export.to_ftp         = 'ftp://ftp.example.com:888'
+      export.ftp_user_name  = 'ftp user'
+      export.ftp_password   = 'ftp password'
 
-      export.imap_address =    'imap.example.com'
-      export.imap_port =       777
-      export.imap_user_name =  'user@example.com'
-      export.imap_password =   'mail_password'
-      export.imap_ssl =         true
-      export.imap_mailbox =    'Mail Inbox'
-      export.imap_archive =    'Mail Archive'
+      export.imap_address   = 'imap.example.com'
+      export.imap_port      = 777
+      export.imap_user_name = 'user@example.com'
+      export.imap_password  = 'mail_password'
+      export.imap_ssl       = true
+      export.imap_mailbox   = 'Mail Inbox'
+      export.imap_archive   = 'Mail Archive'
+      export.imap_search    = 'My Search Query'
     end
   end
 
@@ -100,12 +101,12 @@ describe Itrp::Export::Monitor::Service do
 
       @service.process(@export_mail)
     end
-    
+
     it 'should reset the idle timer when a mail is processed' do
       expect(@service).to receive(:create_exit_when_idle_timer)
       @service.process(@export_mail)
     end
-    
+
     it 'should skip mails when an exception occurs' do
       expect(@export_mail).to receive(:skip_deletion).once
       expect_log("Processing ITRP Export mail:\n  Subject: Export finished - Full ad hoc export -- ITRP example\n  Export ID: 2\n  Token: #{@export_token}\n  URI: #{@export_uri}")
@@ -260,7 +261,7 @@ imap({
 find_options({
   mailbox:           'Mail Inbox',
   archivebox:        'Mail Archive',
-  keys:              'FROM ITRP HEADER X-ITRP-ExportID ""',
+  keys:              'My Search Query',
   delete_after_find: true # Note that only the processed export mails will be deleted
 })
 
@@ -269,4 +270,5 @@ on_mail do |mail|
 end
 OEF
   end
+
 end
