@@ -148,7 +148,7 @@ All options available:
 * _csv_col_sep_:    Set the CSV column separator (default: `','`)
 * _csv_quote_char_: Set the CSV quote character, at most 1 character (default: `'"'`)
 * _csv_value_proc_: Provide a procedure to change values before adding them to the CSV, e.g.
-  `Proc.new{ |value| value.gsub(/\r?\n/, ' ')`
+  `Proc.new{ |value| value.gsub(/\r/, '').gsub(/\n/, ' ')`
 
 
 Start the Export Monitor
