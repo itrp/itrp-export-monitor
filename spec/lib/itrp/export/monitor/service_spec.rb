@@ -97,7 +97,7 @@ describe Itrp::Export::Monitor::Service do
 
     it 'should store export mails' do
       expect_log("Processing ITRP Export mail:\n  Subject: Export finished - Full ad hoc export -- ITRP example\n  Export ID: 2\n  Token: #{@export_token}\n  URI: #{@export_uri}")
-      expect(@service).to receive(:store_export).with{ |export_mail| export_mail.original.should == @export_mail }
+      expect(@service).to receive(:store_export)
 
       @service.process(@export_mail)
     end

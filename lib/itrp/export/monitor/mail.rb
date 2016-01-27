@@ -30,7 +30,7 @@ module Itrp
         # the filename of the csv or zip file
         def filename
           return nil if self.download_uri.blank?
-          @filename ||= self.download_uri[/\/([^\/]+\.(?:csv|zip))\?/, 1]
+          @filename ||= self.download_uri[/\/([^\/]+\.(?:csv|zip))/, 1]
         end
 
         # ignore the message

@@ -4,6 +4,7 @@ describe Itrp::Export::Monitor::Mail do
   before(:each) do
     @export_mail = Itrp::Export::Monitor::Mail.new(::Mail.new(File.read("#{@fixture_dir}/export_finished_1.eml")))
     @non_export_mail = Itrp::Export::Monitor::Mail.new(::Mail.new(File.read("#{@fixture_dir}/non_export.eml")))
+    @on_premise_mail = Itrp::Export::Monitor::Mail.new(::Mail.new(File.read("#{@fixture_dir}/on_premise_export.eml")))
   end
 
   context 'exportID' do
@@ -43,6 +44,10 @@ describe Itrp::Export::Monitor::Mail do
 
     it 'should return nil for non export mails' do
       @non_export_mail.download_uri.should == nil
+    end
+
+    it 'should retrieve the filename for on-premise export mails' do
+      @on_premise_mail.filename.should == '20130911-195545-affected_slas.csv'
     end
   end
 

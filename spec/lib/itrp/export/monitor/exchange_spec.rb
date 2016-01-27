@@ -91,7 +91,7 @@ describe Itrp::Export::Monitor::Exchange do
         expect_log("Copied 4 file(s) from '#{@exchange.fullpath}' to '#{@options[:to_ftp]}/.'")
 
         ftp = double('Net::FTP')
-        expect(ftp).to receive(:pwd).with().and_return('/root').exactly(4).times
+        expect(ftp).to receive(:pwd).with(no_args).and_return('/root').exactly(4).times
         [%w(calendars                     5-20130923-072312-calendars.csv),
          %w(organizations                 5-20130923-072312-organizations.csv),
          %w(organizations_contact_details 5-20130923-072312-organizations_contact_details.csv),
@@ -169,7 +169,7 @@ describe Itrp::Export::Monitor::Exchange do
       expect_log("Copied 1 file(s) from '#{@exchange.fullpath}' to '#{@options[:to_ftp]}/dir1/dir2'")
 
       ftp = double('FTP')
-      expect(ftp).to receive(:pwd).once.with().and_return('/root/dir')
+      expect(ftp).to receive(:pwd).once.with(no_args).and_return('/root/dir')
       expect(ftp).to receive(:mkdir).with('dir1').and_raise(Exception.new('directory already exists'))
       expect(ftp).to receive(:chdir).with('dir1')
       expect(ftp).to receive(:mkdir).with('dir2')
